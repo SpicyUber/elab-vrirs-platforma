@@ -79,7 +79,7 @@ namespace Infrastructure.Persistence
             {
                 e.Property(u => u.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
                 e.Property(u => u.FullName).IsRequired().HasMaxLength(200);
-                e.Property(u => u.Role).HasConversion<string>().HasMaxLength(20);
+                
                 e.Property(u => u.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
                 e.Property(u => u.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
             });
@@ -248,6 +248,24 @@ namespace Infrastructure.Persistence
                  .HasForeignKey(pe => pe.TriggeredByUserId)
                  .OnDelete(DeleteBehavior.Restrict);
             });
+
+            var studentRoleId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var teacherRoleId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+
+            builder.Entity<IdentityRole<Guid>>().HasData(
+                new IdentityRole<Guid>
+                {
+                    Id = studentRoleId,
+                    Name = "Student",
+                    NormalizedName = "STUDENT"
+                },
+                new IdentityRole<Guid>
+                {
+                    Id = teacherRoleId,
+                    Name = "Teacher",
+                    NormalizedName = "TEACHER"
+                }
+            );
         }
     }
 }

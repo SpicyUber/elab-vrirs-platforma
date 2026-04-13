@@ -8,6 +8,25 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.25" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.1.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTOs\" />
+    <Folder Include="Assignment\" />
+    <Folder Include="CourseEnrollment\" />
+    <Folder Include="Course\" />
+    <Folder Include="User\" />
+    <Folder Include="SubmissionReview\" />
+    <Folder Include="Submission\" />
+    <Folder Include="SubmissionContent\" />
+    <Folder Include="ProjectExecution\" />
+    <Folder Include="ProjectAsset\" />
   </ItemGroup>
 
 </Project>

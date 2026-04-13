@@ -36,29 +36,8 @@ namespace VrirsAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var existingUser = await userManager.FindByEmailAsync(dto.Email);
-            if (existingUser != null)
-                return Conflict("A user with this email already exists.");
-
-            var user = new User
-            {
-                FullName = dto.FullName,
-                Email = dto.Email,
-                UserName = dto.Email, // Identity still needs UserName internally
-                IsActive = true,
-            };
-
-            var result = await userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded)
-                return BadRequest(result.Errors);
-
-            // Assign default role
-            await userManager.AddToRoleAsync(user, "Student");
-
-            return Ok("User registered successfully.");
+           
+            return Ok("Not implemented.");
         }
     }
 }

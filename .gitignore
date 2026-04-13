@@ -426,3 +426,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Extras for this specific project
+appsettings.json
+appsettings.Development.json

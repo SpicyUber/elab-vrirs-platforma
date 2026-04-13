@@ -1,0 +1,6 @@
+@VrirsAPI_HostAddress = http://localhost:5067
+
+GET {{VrirsAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

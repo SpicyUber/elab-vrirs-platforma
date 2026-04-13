@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories.Interfaces
 {
-    internal interface ISubmissionReviewRepository : IRepository<SubmissionReview>
+    public interface ISubmissionReviewRepository : IRepository<SubmissionReview>
     {
     }
 }

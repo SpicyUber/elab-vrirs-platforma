@@ -16,7 +16,7 @@ namespace Application.Services
         public async Task<string> GenerateToken(User user)
         {
             var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
-            new Claim(ClaimTypes.Email,user.NormalizedEmail), new Claim(ClaimTypes.Role, (await userManager.GetRolesAsync(user))[0])
+            new Claim(ClaimTypes.Email,user.Email), new Claim(ClaimTypes.Role, (await userManager.GetRolesAsync(user))[0])
 
             };
 
@@ -27,7 +27,7 @@ namespace Application.Services
                 issuer: config.GetSection("JwtSettings")["Issuer"],
                 audience: config.GetSection("JwtSettings")["Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(int.Parse(config.GetSection("JwtSettings")["ExpiryMinutes"])),
+                expires: DateTime.UtcNow.AddMinutes(int.Parse(config.GetSection("JwtSettings")["ExpiryMinutes"])),
                 signingCredentials: credentials
                 );
 

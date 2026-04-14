@@ -1,43 +1,53 @@
-﻿using Domain.Entities;
+﻿using Application.Commands.User;
+using Application.DTOs.User;
+using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Persistence.UnitOfWork.Interface;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace VrirsAPI.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/")]
     public class UserController : ControllerBase
     {
-        private readonly IUnitOfWork uow;
-        private readonly UserManager<User> userManager;
+        private readonly IMediator mediator;
 
-        public UserController(IUnitOfWork uow, UserManager<User> userManager)
+        public UserController(IMediator mediator)
         {
-            this.uow = uow;
-            this.userManager = userManager;
+            this.mediator = mediator;
+            
         }
-        public class RegisterDto
-        {
-            [Required]
-            public string FullName { get; set; } = string.Empty;
-
-            [Required, EmailAddress]
-            public string Email { get; set; } = string.Empty;
-
-            [Required, MinLength(8)]
-            public string Password { get; set; } = string.Empty;
-
- 
-        }
+        
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+        public async Task<ActionResult<UserSessionInfo>> Register([FromBody] RegisterCommand request)
         {
-           
-            return Ok("Not implemented.");
+            try
+            {
+                var response = await mediator.Send(request);
+                return Ok(response);
+            }catch(InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<UserSessionInfo>> Register([FromBody] LoginCommand request)
+        {
+            try
+            {
+                var response = await mediator.Send(request);
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
     }
 }

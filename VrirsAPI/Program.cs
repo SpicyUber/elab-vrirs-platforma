@@ -4,6 +4,7 @@ using Domain.Entities;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.UnitOfWork.Implementation;
 using Infrastructure.Persistence.UnitOfWork.Interface;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -95,7 +96,7 @@ namespace VrirsAPI
         {
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-
+            builder.Services.AddScoped<IMediator, Mediator>();
             builder.Services.AddScoped<UserManager<User>>();
             builder.Services.AddScoped<JwtService>();
         }

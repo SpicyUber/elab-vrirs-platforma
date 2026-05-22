@@ -10,7 +10,7 @@ namespace Domain.Entities
     public class ProjectExecution
     {
         public Guid Id { get; set; }
-        public Guid SubmissionId { get; set; }
+        public Guid ProjectAssetId { get; set; }
         public Guid TriggeredByUserId { get; set; }
         public ExecutionStatus ExecutionStatus { get; set; } = ExecutionStatus.Pending;
         public DateTime? StartedAt { get; set; }
@@ -18,7 +18,7 @@ namespace Domain.Entities
         public string? OutputLog { get; set; }
         public string? ErrorLog { get; set; }
 
-        public Submission Submission { get; set; } = null!;
+        public ProjectAsset ProjectAsset { get; set; } = null!;
         public User TriggeredByUser { get; set; } = null!;
     }
 }

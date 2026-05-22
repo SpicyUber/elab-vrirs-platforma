@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
@@ -36,8 +38,9 @@ namespace Infrastructure.Persistence.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID( )"),
                     FullName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    IndexNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    AvatarFilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -93,6 +96,9 @@ namespace Infrastructure.Persistence.Migrations
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
                     CreatedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Category = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
@@ -203,43 +209,6 @@ namespace Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "assignments",
-                schema: "vrirs",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID( )"),
-                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
-                    OpensAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DueAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    AllowProjectUpload = table.Column<bool>(type: "bit", nullable: false),
-                    AllowMultipleAttempts = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_assignments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_assignments_courses_CourseId",
-                        column: x => x.CourseId,
-                        principalSchema: "vrirs",
-                        principalTable: "courses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_assignments_users_CreatedByUserId",
-                        column: x => x.CreatedByUserId,
-                        principalSchema: "vrirs",
-                        principalTable: "users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "course_enrollments",
                 schema: "vrirs",
                 columns: table => new
@@ -271,6 +240,48 @@ namespace Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "assignments",
+                schema: "vrirs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID( )"),
+                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExampleProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    ProjectCategory = table.Column<int>(type: "int", nullable: false),
+                    OpensAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DueAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    AllowProjectUpload = table.Column<bool>(type: "bit", nullable: false),
+                    AllowMultipleAttempts = table.Column<bool>(type: "bit", nullable: false),
+                    MaxPoints = table.Column<int>(type: "int", nullable: false),
+                    MinPoints = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_assignments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_assignments_courses_CourseId",
+                        column: x => x.CourseId,
+                        principalSchema: "vrirs",
+                        principalTable: "courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_assignments_users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalSchema: "vrirs",
+                        principalTable: "users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "submissions",
                 schema: "vrirs",
                 columns: table => new
@@ -280,7 +291,6 @@ namespace Infrastructure.Persistence.Migrations
                     StudentUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
-                    SubmissionType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     Status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     SubmittedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
@@ -318,7 +328,6 @@ namespace Infrastructure.Persistence.Migrations
                     MimeType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     FileSize = table.Column<long>(type: "bigint", nullable: false),
                     UploadStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
                 constraints: table =>
@@ -326,63 +335,6 @@ namespace Infrastructure.Persistence.Migrations
                     table.PrimaryKey("PK_project_assets", x => x.Id);
                     table.ForeignKey(
                         name: "FK_project_assets_submissions_SubmissionId",
-                        column: x => x.SubmissionId,
-                        principalSchema: "vrirs",
-                        principalTable: "submissions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "project_executions",
-                schema: "vrirs",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID( )"),
-                    SubmissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TriggeredByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ExecutionStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    StartedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    FinishedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    OutputLog = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ErrorLog = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_project_executions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_project_executions_submissions_SubmissionId",
-                        column: x => x.SubmissionId,
-                        principalSchema: "vrirs",
-                        principalTable: "submissions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_project_executions_users_TriggeredByUserId",
-                        column: x => x.TriggeredByUserId,
-                        principalSchema: "vrirs",
-                        principalTable: "users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "submission_contents",
-                schema: "vrirs",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID( )"),
-                    SubmissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ContentFormat = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    ContentText = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    VersionNumber = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_submission_contents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_submission_contents_submissions_SubmissionId",
                         column: x => x.SubmissionId,
                         principalSchema: "vrirs",
                         principalTable: "submissions",
@@ -400,7 +352,8 @@ namespace Infrastructure.Persistence.Migrations
                     ReviewedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ReviewStatus = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     ReviewComment = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
-                    ReviewedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    ReviewedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    Points = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -421,6 +374,50 @@ namespace Infrastructure.Persistence.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "project_executions",
+                schema: "vrirs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID( )"),
+                    ProjectAssetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TriggeredByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExecutionStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    StartedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FinishedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    OutputLog = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ErrorLog = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_project_executions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_project_executions_project_assets_ProjectAssetId",
+                        column: x => x.ProjectAssetId,
+                        principalSchema: "vrirs",
+                        principalTable: "project_assets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_project_executions_users_TriggeredByUserId",
+                        column: x => x.TriggeredByUserId,
+                        principalSchema: "vrirs",
+                        principalTable: "users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.InsertData(
+                schema: "vrirs",
+                table: "roles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { new Guid("11111111-1111-1111-1111-111111111111"), null, "Student", "STUDENT" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), null, "Teacher", "TEACHER" },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), null, "Admin", "ADMIN" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_assignments_CourseId",
                 schema: "vrirs",
@@ -432,6 +429,12 @@ namespace Infrastructure.Persistence.Migrations
                 schema: "vrirs",
                 table: "assignments",
                 column: "CreatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_assignments_ExampleProjectId",
+                schema: "vrirs",
+                table: "assignments",
+                column: "ExampleProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_course_enrollments_CourseId_UserId",
@@ -459,10 +462,10 @@ namespace Infrastructure.Persistence.Migrations
                 column: "SubmissionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_project_executions_SubmissionId",
+                name: "IX_project_executions_ProjectAssetId",
                 schema: "vrirs",
                 table: "project_executions",
-                column: "SubmissionId");
+                column: "ProjectAssetId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_project_executions_TriggeredByUserId",
@@ -483,13 +486,6 @@ namespace Infrastructure.Persistence.Migrations
                 column: "NormalizedName",
                 unique: true,
                 filter: "[NormalizedName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_submission_contents_SubmissionId_VersionNumber",
-                schema: "vrirs",
-                table: "submission_contents",
-                columns: new[] { "SubmissionId", "VersionNumber" },
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_submission_reviews_ReviewedByUserId",
@@ -546,17 +542,32 @@ namespace Infrastructure.Persistence.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_assignments_project_assets_ExampleProjectId",
+                schema: "vrirs",
+                table: "assignments",
+                column: "ExampleProjectId",
+                principalSchema: "vrirs",
+                principalTable: "project_assets",
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "course_enrollments",
-                schema: "vrirs");
+            migrationBuilder.DropForeignKey(
+                name: "FK_assignments_courses_CourseId",
+                schema: "vrirs",
+                table: "assignments");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_assignments_project_assets_ExampleProjectId",
+                schema: "vrirs",
+                table: "assignments");
 
             migrationBuilder.DropTable(
-                name: "project_assets",
+                name: "course_enrollments",
                 schema: "vrirs");
 
             migrationBuilder.DropTable(
@@ -565,10 +576,6 @@ namespace Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "role_claims",
-                schema: "vrirs");
-
-            migrationBuilder.DropTable(
-                name: "submission_contents",
                 schema: "vrirs");
 
             migrationBuilder.DropTable(
@@ -592,19 +599,23 @@ namespace Infrastructure.Persistence.Migrations
                 schema: "vrirs");
 
             migrationBuilder.DropTable(
-                name: "submissions",
-                schema: "vrirs");
-
-            migrationBuilder.DropTable(
                 name: "roles",
                 schema: "vrirs");
 
             migrationBuilder.DropTable(
-                name: "assignments",
+                name: "courses",
                 schema: "vrirs");
 
             migrationBuilder.DropTable(
-                name: "courses",
+                name: "project_assets",
+                schema: "vrirs");
+
+            migrationBuilder.DropTable(
+                name: "submissions",
+                schema: "vrirs");
+
+            migrationBuilder.DropTable(
+                name: "assignments",
                 schema: "vrirs");
 
             migrationBuilder.DropTable(

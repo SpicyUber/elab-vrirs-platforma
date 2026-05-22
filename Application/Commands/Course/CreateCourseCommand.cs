@@ -12,9 +12,8 @@ namespace Application.Commands.Course
     {
         public string Name { get; set; } = string.Empty;
 
-
         public string? Description { get; set; }
 
-        public Guid CreatedByUserId { get; set; } 
+        public Guid CreatedByUserId { get; set; }
     }
 }

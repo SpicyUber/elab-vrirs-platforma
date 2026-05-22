@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Numerics;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -38,12 +39,11 @@ namespace VrirsAPI
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
-            app.UseAuthentication(); 
-            app.UseAuthorization();
+            
             app.Run();
         }
 
@@ -67,7 +67,9 @@ namespace VrirsAPI
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtSettings["Issuer"],
                     ValidAudience = jwtSettings["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                    NameClaimType = ClaimTypes.NameIdentifier,
+                    RoleClaimType = ClaimTypes.Role
                 };
             });
         }
@@ -78,7 +80,8 @@ namespace VrirsAPI
 
             AddDependencyInjections(builder);
 
-            builder.Services.AddIdentity<User, IdentityRole<Guid>>(options => { options.Password.RequiredLength = 6; options.User.RequireUniqueEmail = true; options.SignIn.RequireConfirmedEmail = false; }).AddEntityFrameworkStores<VrirsDbContext>();
+            builder.Services.AddIdentity<User, IdentityRole<Guid>>(options => { options.Password.RequiredLength = 6; options.User.RequireUniqueEmail = true; options.SignIn.RequireConfirmedEmail = false; })
+                .AddEntityFrameworkStores<VrirsDbContext>();
            
             builder.Services.AddDbContext<VrirsDbContext>((options) => { options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")); });
             
@@ -97,7 +100,6 @@ namespace VrirsAPI
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             builder.Services.AddScoped<IMediator, Mediator>();
-            builder.Services.AddScoped<UserManager<User>>();
             builder.Services.AddScoped<JwtService>();
         }
     }

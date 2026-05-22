@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class ProjectAsset
+    public class AssignmentFile
     {
         public Guid Id { get; set; }
-        public Guid SubmissionId { get; set; }
-        public AssetType AssetType { get; set; }
+        public Guid AssignmentId { get; set; }
+        public AssignmentFileType FileType { get; set; }
         public string FileName { get; set; } = string.Empty;
         public string FilePath { get; set; } = string.Empty;
         public string MimeType { get; set; } = string.Empty;
         public long FileSize { get; set; }
         public UploadStatus UploadStatus { get; set; } = UploadStatus.Uploaded;
+        public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; }
 
-        public Submission Submission { get; set; } = null!;
-        public ICollection<ProjectExecution> Executions { get; set; } = [];
+        public Assignment Assignment { get; set; } = null!;
     }
 }

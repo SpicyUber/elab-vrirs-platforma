@@ -14,7 +14,6 @@ namespace Infrastructure.Persistence.UnitOfWork.Interface
             public ICourseRepository CourseRepository { get; }
             public IProjectAssetRepository ProjectAssetRepository { get; }
             public IProjectExecutionRepository ProjectExecutionRepository { get; }
-            public ISubmissionContentRepository SubmissionContentRepository { get; }
             public ISubmissionRepository SubmissionRepository { get; }
             public ISubmissionReviewRepository SubmissionReviewRepository { get; }
             public IUserRepository UserRepository { get; }

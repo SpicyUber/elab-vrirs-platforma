@@ -6,7 +6,9 @@ namespace Domain.Entities
     public class User : IdentityUser<Guid>
     {
         public string FullName { get; set; } = string.Empty;
+        public string IndexNumber { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
+        public string AvatarFilePath { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 

@@ -1,4 +1,4 @@
 ﻿namespace Domain.Enums
 {
-    public enum SubmissionType { Csmp, Gpss, Python }
+    public enum SubmissionType { Csmp, Gpss }
 }

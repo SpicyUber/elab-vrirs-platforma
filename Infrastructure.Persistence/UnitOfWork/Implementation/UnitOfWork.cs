@@ -18,7 +18,6 @@ namespace Infrastructure.Persistence.UnitOfWork.Implementation
         public ICourseRepository CourseRepository { get; }
         public IProjectAssetRepository ProjectAssetRepository { get; }
         public IProjectExecutionRepository ProjectExecutionRepository { get; }
-        public ISubmissionContentRepository SubmissionContentRepository { get; }
         public ISubmissionRepository SubmissionRepository { get; }
         public ISubmissionReviewRepository SubmissionReviewRepository { get; }
         public IUserRepository UserRepository { get; }
@@ -31,7 +30,6 @@ namespace Infrastructure.Persistence.UnitOfWork.Implementation
             CourseRepository = new CourseRepository(this.context);
             ProjectAssetRepository = new ProjectAssetRepository(this.context);
             ProjectExecutionRepository = new ProjectExecutionRepository(this.context);
-            SubmissionContentRepository = new SubmissionContentRepository(this.context);
             SubmissionRepository = new SubmissionRepository(this.context);
             SubmissionReviewRepository = new SubmissionReviewRepository(this.context);
             UserRepository = new UserRepository(this.context);

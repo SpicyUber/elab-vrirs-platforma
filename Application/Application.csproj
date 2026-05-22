@@ -23,7 +23,6 @@
     <Folder Include="Commands\CourseEnrollment\" />
     <Folder Include="Commands\SubmissionReview\" />
     <Folder Include="Commands\Submission\" />
-    <Folder Include="Commands\SubmissionContent\" />
     <Folder Include="Commands\ProjectExecution\" />
     <Folder Include="Commands\ProjectAsset\" />
     <Folder Include="Queries\Assignment\" />
@@ -32,9 +31,7 @@
     <Folder Include="Queries\User\" />
     <Folder Include="Queries\ProjectAsset\" />
     <Folder Include="Queries\ProjectExecution\" />
-    <Folder Include="Queries\SubmissionContent\" />
     <Folder Include="Queries\SubmissionReview\" />
-    <Folder Include="Queries\Submission\" />
   </ItemGroup>
 
 </Project>

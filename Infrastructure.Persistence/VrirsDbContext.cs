@@ -14,7 +14,6 @@ namespace Infrastructure.Persistence
         public DbSet<CourseEnrollment> CourseEnrollments => Set<CourseEnrollment>();
         public DbSet<Assignment> Assignments => Set<Assignment>();
         public DbSet<Submission> Submissions => Set<Submission>();
-        public DbSet<SubmissionContent> SubmissionContents => Set<SubmissionContent>();
         public DbSet<ProjectAsset> ProjectAssets => Set<ProjectAsset>();
         public DbSet<SubmissionReview> SubmissionReviews => Set<SubmissionReview>();
         public DbSet<ProjectExecution> ProjectExecutions => Set<ProjectExecution>();
@@ -155,7 +154,6 @@ namespace Infrastructure.Persistence
                 e.Property(s => s.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
                 e.Property(s => s.Title).IsRequired().HasMaxLength(400);
                 e.Property(s => s.Description).HasMaxLength(4000);
-                e.Property(s => s.SubmissionType).HasConversion<string>().HasMaxLength(20);
                 e.Property(s => s.Status).HasConversion<string>().HasMaxLength(30);
                 e.Property(s => s.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
                 e.Property(s => s.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
@@ -171,23 +169,6 @@ namespace Infrastructure.Persistence
                  .OnDelete(DeleteBehavior.Restrict);
             });
 
-             
-            builder.Entity<SubmissionContent>(e =>
-            {
-                e.ToTable("submission_contents");
-                e.HasKey(sc => sc.Id);
-                e.Property(sc => sc.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
-                e.Property(sc => sc.ContentFormat).HasConversion<string>().HasMaxLength(20);
-                e.Property(sc => sc.ContentText).IsRequired();
-                e.Property(sc => sc.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-
-                e.HasIndex(sc => new { sc.SubmissionId, sc.VersionNumber }).IsUnique();
-
-                e.HasOne(sc => sc.Submission)
-                 .WithMany(s => s.Contents)
-                 .HasForeignKey(sc => sc.SubmissionId)
-                 .OnDelete(DeleteBehavior.Cascade);
-            });
 
              
             builder.Entity<ProjectAsset>(e =>
@@ -238,9 +219,9 @@ namespace Infrastructure.Persistence
                 e.Property(pe => pe.ExecutionStatus).HasConversion<string>().HasMaxLength(20);
                 e.Property(pe => pe.StartedAt);
 
-                e.HasOne(pe => pe.Submission)
-                 .WithMany(s => s.Executions)
-                 .HasForeignKey(pe => pe.SubmissionId)
+                e.HasOne(pe => pe.ProjectAsset)
+                 .WithMany(pa => pa.Executions)
+                 .HasForeignKey(pe => pe.ProjectAssetId)
                  .OnDelete(DeleteBehavior.Cascade);
 
                 e.HasOne(pe => pe.TriggeredByUser)

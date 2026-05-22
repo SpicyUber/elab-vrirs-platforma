@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(VrirsDbContext))]
-    [Migration("20260413205710_RemoveRoleDuplicateFieldAndAddRoleSeed")]
-    partial class RemoveRoleDuplicateFieldAndAddRoleSeed
+    [Migration("20260522214451_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,8 +57,20 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("DueAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("ExampleProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MaxPoints")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinPoints")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("OpensAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("ProjectCategory")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -69,6 +81,9 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -81,6 +96,8 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
+                    b.HasIndex("ExampleProjectId");
+
                     b.ToTable("assignments", "vrirs");
                 });
 
@@ -90,6 +107,9 @@ namespace Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWSEQUENTIALID( )");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -103,6 +123,9 @@ namespace Infrastructure.Persistence.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -110,6 +133,9 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -191,9 +217,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<long>("FileSize")
                         .HasColumnType("bigint");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<string>("MimeType")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -235,18 +258,18 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<string>("OutputLog")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("ProjectAssetId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("StartedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("SubmissionId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("TriggeredByUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SubmissionId");
+                    b.HasIndex("ProjectAssetId");
 
                     b.HasIndex("TriggeredByUserId");
 
@@ -280,11 +303,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<Guid>("StudentUserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("SubmissionType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<DateTime?>("SubmittedAt")
                         .HasColumnType("datetime2");
 
@@ -307,47 +325,15 @@ namespace Infrastructure.Persistence.Migrations
                     b.ToTable("submissions", "vrirs");
                 });
 
-            modelBuilder.Entity("Domain.Entities.SubmissionContent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID( )");
-
-                    b.Property<string>("ContentFormat")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ContentText")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<Guid>("SubmissionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("VersionNumber")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubmissionId", "VersionNumber")
-                        .IsUnique();
-
-                    b.ToTable("submission_contents", "vrirs");
-                });
-
             modelBuilder.Entity("Domain.Entities.SubmissionReview", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWSEQUENTIALID( )");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
 
                     b.Property<string>("ReviewComment")
                         .HasMaxLength(4000)
@@ -388,6 +374,10 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("AvatarFilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -408,6 +398,10 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("IndexNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -502,6 +496,12 @@ namespace Infrastructure.Persistence.Migrations
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
                         });
                 });
 
@@ -622,9 +622,15 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.ProjectAsset", "ExampleProject")
+                        .WithMany()
+                        .HasForeignKey("ExampleProjectId");
+
                     b.Navigation("Course");
 
                     b.Navigation("CreatedByUser");
+
+                    b.Navigation("ExampleProject");
                 });
 
             modelBuilder.Entity("Domain.Entities.Course", b =>
@@ -670,9 +676,9 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.ProjectExecution", b =>
                 {
-                    b.HasOne("Domain.Entities.Submission", "Submission")
+                    b.HasOne("Domain.Entities.ProjectAsset", "ProjectAsset")
                         .WithMany("Executions")
-                        .HasForeignKey("SubmissionId")
+                        .HasForeignKey("ProjectAssetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -682,7 +688,7 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Submission");
+                    b.Navigation("ProjectAsset");
 
                     b.Navigation("TriggeredByUser");
                 });
@@ -704,17 +710,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("Assignment");
 
                     b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("Domain.Entities.SubmissionContent", b =>
-                {
-                    b.HasOne("Domain.Entities.Submission", "Submission")
-                        .WithMany("Contents")
-                        .HasForeignKey("SubmissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Submission");
                 });
 
             modelBuilder.Entity("Domain.Entities.SubmissionReview", b =>
@@ -799,13 +794,14 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("Enrollments");
                 });
 
+            modelBuilder.Entity("Domain.Entities.ProjectAsset", b =>
+                {
+                    b.Navigation("Executions");
+                });
+
             modelBuilder.Entity("Domain.Entities.Submission", b =>
                 {
                     b.Navigation("Assets");
-
-                    b.Navigation("Contents");
-
-                    b.Navigation("Executions");
 
                     b.Navigation("Reviews");
                 });

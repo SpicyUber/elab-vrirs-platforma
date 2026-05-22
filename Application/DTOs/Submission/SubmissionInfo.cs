@@ -1,13 +1,14 @@
 ﻿using Domain.Enums;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Entities
+namespace Application.DTOs.Submission
 {
-    public class Submission
+    public class SubmissionInfo
     {
         public Guid Id { get; set; }
         public Guid AssignmentId { get; set; }
@@ -17,14 +18,15 @@ namespace Domain.Entities
         public SubmissionStatus Status { get; set; } = SubmissionStatus.Draft;
         public DateTime? SubmittedAt { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-
-        public Assignment Assignment { get; set; } = null!;
-        public User Student { get; set; } = null!;
-
-        public ICollection<ProjectAsset> Assets { get; set; } = [];
-        public ICollection<SubmissionReview> Reviews { get; set; } = [];
-
+        public SubmissionInfo(Domain.Entities.Submission submission)
+        {
+            Id = submission.Id;
+            AssignmentId = submission.AssignmentId;
+            StudentUserId = submission.StudentUserId;
+            Title = submission.Title;
+            Description = submission.Description;
+            Status = submission.Status;
+            SubmittedAt = submission.SubmittedAt;
+        }
     }
 }

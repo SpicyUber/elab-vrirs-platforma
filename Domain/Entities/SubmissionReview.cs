@@ -16,6 +16,8 @@ namespace Domain.Entities
         public string? ReviewComment { get; set; }
         public DateTime ReviewedAt { get; set; }
 
+        public int Points { get; set; }
+
         public Submission Submission { get; set; } = null!;
         public User ReviewedByUser { get; set; } = null!;
     }

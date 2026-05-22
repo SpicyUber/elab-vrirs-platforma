@@ -251,6 +251,7 @@ namespace Infrastructure.Persistence
 
             var studentRoleId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var teacherRoleId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            var adminRoleId = Guid.Parse("33333333-3333-3333-3333-333333333333");
 
             builder.Entity<IdentityRole<Guid>>().HasData(
                 new IdentityRole<Guid>
@@ -264,6 +265,12 @@ namespace Infrastructure.Persistence
                     Id = teacherRoleId,
                     Name = "Teacher",
                     NormalizedName = "TEACHER"
+                },
+                new IdentityRole<Guid>
+                {
+                    Id = adminRoleId,
+                    Name = "Admin",
+                    NormalizedName = "ADMIN"
                 }
             );
         }

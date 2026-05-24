@@ -1,8 +1,10 @@
 ﻿using Domain.Entities;
+using Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
- 
+using System.Reflection.Emit;
+
 
 namespace Infrastructure.Persistence
 {
@@ -10,13 +12,18 @@ namespace Infrastructure.Persistence
     {
         public VrirsDbContext(DbContextOptions<VrirsDbContext> options) : base(options) { }
 
-        public DbSet<Course> Courses => Set<Course>();
-        public DbSet<CourseEnrollment> CourseEnrollments => Set<CourseEnrollment>();
-        public DbSet<Assignment> Assignments => Set<Assignment>();
-        public DbSet<Submission> Submissions => Set<Submission>();
-        public DbSet<ProjectAsset> ProjectAssets => Set<ProjectAsset>();
-        public DbSet<SubmissionReview> SubmissionReviews => Set<SubmissionReview>();
-        public DbSet<ProjectExecution> ProjectExecutions => Set<ProjectExecution>();
+        public DbSet<User> Users { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
+        public DbSet<Assignment> Assignments { get; set; }
+        public DbSet<AssignmentAsset> AssignmentAssets { get; set; }
+        public DbSet<FileMetadata> FileMetadata { get; set; }
+        public DbSet<Submission> Submissions { get; set; }
+        public DbSet<ProjectAsset> ProjectAssets { get; set; }
+        public DbSet<SubmissionReview> SubmissionReviews { get; set; }
+        public DbSet<SubmissionTest> SubmissionTests { get; set; }
+        public DbSet<SubmissionTestCase> SubmissionTestCases { get; set; }
+        public DbSet<SubmissionTestExecution> SubmissionTestExecutions { get; set; }
 
         public override int SaveChanges()
         {
@@ -33,28 +40,14 @@ namespace Infrastructure.Persistence
         private void ApplyAuditTimestamps()
         {
             var now = DateTime.UtcNow;
-            foreach (var entry in ChangeTracker.Entries())
+            foreach(var entry in ChangeTracker.Entries())
             {
-                if (entry.Entity is User u)
+                if(entry.Entity is IAuditableEntity auditableEntity)
                 {
-                    if (entry.State == EntityState.Added) u.CreatedAt = now;
-                    if (entry.State is EntityState.Added or EntityState.Modified) u.UpdatedAt = now;
+                    if(entry.State == EntityState.Added) auditableEntity.CreatedAt = now;
+                    if(entry.State is EntityState.Added or EntityState.Modified) auditableEntity.UpdatedAt = now;
                 }
-                else if (entry.Entity is Course c)
-                {
-                    if (entry.State == EntityState.Added) c.CreatedAt = now;
-                    if (entry.State is EntityState.Added or EntityState.Modified) c.UpdatedAt = now;
-                }
-                else if (entry.Entity is Assignment a)
-                {
-                    if (entry.State == EntityState.Added) a.CreatedAt = now;
-                    if (entry.State is EntityState.Added or EntityState.Modified) a.UpdatedAt = now;
-                }
-                else if (entry.Entity is Submission s)
-                {
-                    if (entry.State == EntityState.Added) s.CreatedAt = now;
-                    if (entry.State is EntityState.Added or EntityState.Modified) s.UpdatedAt = now;
-                }
+
             }
         }
 
@@ -64,172 +57,199 @@ namespace Infrastructure.Persistence
 
             builder.HasDefaultSchema("vrirs");
 
+            ConfigureUser(builder);
+            ConfigureCourse(builder);
 
-            builder.Entity<User>().ToTable("users");
-            builder.Entity<IdentityRole<Guid>>().ToTable("roles");
-            builder.Entity<IdentityUserRole<Guid>>().ToTable("user_roles");
-            builder.Entity<IdentityUserClaim<Guid>>().ToTable("user_claims");
-            builder.Entity<IdentityUserLogin<Guid>>().ToTable("user_logins");
-            builder.Entity<IdentityUserToken<Guid>>().ToTable("user_tokens");
-            builder.Entity<IdentityRoleClaim<Guid>>().ToTable("role_claims");
+            ConfigureCourseEnrollment(builder);
+            ConfigureAssignment(builder);
 
+            ConfigureAssignmentAsset(builder);
+            ConfigureFileMetadata(builder);
 
-            builder.Entity<User>(e =>
-            {
-                e.Property(u => u.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
-                e.Property(u => u.FullName).IsRequired().HasMaxLength(200);
-                
-                e.Property(u => u.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-                e.Property(u => u.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
-            });
+            ConfigureSubmission(builder);
+            ConfigureProjectAsset(builder);
 
-          
-            builder.Entity<Course>(e =>
-            {
-                e.ToTable("courses");
-                e.HasKey(c => c.Id);
-                e.Property(c => c.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
-                e.Property(c => c.Name).IsRequired().HasMaxLength(300);
-                e.Property(c => c.Description).HasMaxLength(2000);
-                e.Property(c => c.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-                e.Property(c => c.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            ConfigureSubmissionReview(builder);
+            ConfigureSubmissionTestCase(builder);
 
-                e.HasOne(c => c.CreatedByUser)
-                 .WithMany(u => u.CreatedCourses)
-                 .HasForeignKey(c => c.CreatedByUserId)
-                 .OnDelete(DeleteBehavior.Restrict);
-            });
+            ConfigureSubmissionTestExecution(builder);
 
-            
-            builder.Entity<CourseEnrollment>(e =>
-            {
-                e.ToTable("course_enrollments");
-                e.HasKey(ce => ce.Id);
-                e.Property(ce => ce.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
-                e.Property(ce => ce.EnrollmentRole).HasConversion<string>().HasMaxLength(20);
-                e.Property(ce => ce.Status).HasConversion<string>().HasMaxLength(20);
-                e.Property(ce => ce.EnrolledAt).HasDefaultValueSql("GETUTCDATE()");
+            AddRoles(builder);
+        }
 
-                e.HasIndex(ce => new { ce.CourseId, ce.UserId }).IsUnique();
+        private void ConfigureUser(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.AvatarFile)
+                .WithMany()
+                .HasForeignKey(u => u.AvatarFileId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
 
-                e.HasOne(ce => ce.Course)
-                 .WithMany(c => c.Enrollments)
-                 .HasForeignKey(ce => ce.CourseId)
-                 .OnDelete(DeleteBehavior.Cascade);
+        private void ConfigureCourse(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Course>()
+                .HasOne(c => c.CreatedByUser)
+                .WithMany(u => u.CreatedCourses)
+                .HasForeignKey(c => c.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
 
-                e.HasOne(ce => ce.User)
-                 .WithMany(u => u.Enrollments)
-                 .HasForeignKey(ce => ce.UserId)
-                 .OnDelete(DeleteBehavior.Cascade);
-            });
+        private void ConfigureCourseEnrollment(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CourseEnrollment>()
+                .HasKey(e => new { e.CourseId, e.UserId });
 
-             
-            builder.Entity<Assignment>(e =>
-            {
-                e.ToTable("assignments");
-                e.HasKey(a => a.Id);
-                e.Property(a => a.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
-                e.Property(a => a.Title).IsRequired().HasMaxLength(400);
-                e.Property(a => a.Description).HasMaxLength(4000);
-                e.Property(a => a.Status).HasConversion<string>().HasMaxLength(20);
-                e.Property(a => a.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-                e.Property(a => a.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            modelBuilder.Entity<CourseEnrollment>()
+                .HasOne(e => e.Course)
+                .WithMany(c => c.Enrollments)
+                .HasForeignKey(e => e.CourseId);
 
-                e.HasOne(a => a.Course)
-                 .WithMany(c => c.Assignments)
-                 .HasForeignKey(a => a.CourseId)
-                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<CourseEnrollment>()
+                .HasOne(e => e.User)
+                .WithMany(u => u.Enrollments)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
 
-                e.HasOne(a => a.CreatedByUser)
-                 .WithMany(u => u.CreatedAssignments)
-                 .HasForeignKey(a => a.CreatedByUserId)
-                 .OnDelete(DeleteBehavior.Restrict);
-            });
+        private void ConfigureAssignment(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Assignment>()
+                .HasOne(a => a.Course)
+                .WithMany(c => c.Assignments)
+                .HasForeignKey(a => a.CourseId);
 
-             
-            builder.Entity<Submission>(e =>
-            {
-                e.ToTable("submissions");
-                e.HasKey(s => s.Id);
-                e.Property(s => s.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
-                e.Property(s => s.Title).IsRequired().HasMaxLength(400);
-                e.Property(s => s.Description).HasMaxLength(4000);
-                e.Property(s => s.Status).HasConversion<string>().HasMaxLength(30);
-                e.Property(s => s.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-                e.Property(s => s.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            modelBuilder.Entity<Assignment>()
+                .HasOne(a => a.CreatedByUser)
+                .WithMany(u => u.CreatedAssignments)
+                .HasForeignKey(a => a.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-                e.HasOne(s => s.Assignment)
-                 .WithMany(a => a.Submissions)
-                 .HasForeignKey(s => s.AssignmentId)
-                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Assignment>()
+                .HasOne(a => a.SubmissionTest)
+                .WithMany()
+                .HasForeignKey(a => a.SubmissionTestId)
+                .IsRequired(false);
 
-                e.HasOne(s => s.Student)
-                 .WithMany(u => u.Submissions)
-                 .HasForeignKey(s => s.StudentUserId)
-                 .OnDelete(DeleteBehavior.Restrict);
-            });
+            modelBuilder.Entity<Assignment>()
+                .ToTable(t => t.HasCheckConstraint("CK_Assignment_Points",
+        "[MinPoints] >= 0 AND [MaxPoints] >= [MinPoints]"));
+        }
 
+        private void ConfigureAssignmentAsset(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AssignmentAsset>()
+                .HasKey(a => new { a.AssignmentId, a.FileMetadataId });
 
-             
-            builder.Entity<ProjectAsset>(e =>
-            {
-                e.ToTable("project_assets");
-                e.HasKey(pa => pa.Id);
-                e.Property(pa => pa.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
-                e.Property(pa => pa.AssetType).HasConversion<string>().HasMaxLength(30);
-                e.Property(pa => pa.FileName).IsRequired().HasMaxLength(500);
-                e.Property(pa => pa.FilePath).IsRequired().HasMaxLength(1000);
-                e.Property(pa => pa.MimeType).IsRequired().HasMaxLength(100);
-                e.Property(pa => pa.UploadStatus).HasConversion<string>().HasMaxLength(20);
-                e.Property(pa => pa.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            modelBuilder.Entity<AssignmentAsset>()
+                .HasOne(a => a.Assignment)
+                .WithMany(a => a.AssignmentAssets)
+                .HasForeignKey(a => a.AssignmentId);
 
-                e.HasOne(pa => pa.Submission)
-                 .WithMany(s => s.Assets)
-                 .HasForeignKey(pa => pa.SubmissionId)
-                 .OnDelete(DeleteBehavior.Cascade);
-            });
+            modelBuilder.Entity<AssignmentAsset>()
+                .HasOne(a => a.FileMetadata)
+                .WithMany()
+                .HasForeignKey(a => a.FileMetadataId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
 
-             
-            builder.Entity<SubmissionReview>(e =>
-            {
-                e.ToTable("submission_reviews");
-                e.HasKey(sr => sr.Id);
-                e.Property(sr => sr.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
-                e.Property(sr => sr.ReviewStatus).HasConversion<string>().HasMaxLength(30);
-                e.Property(sr => sr.ReviewComment).HasMaxLength(4000);
-                e.Property(sr => sr.ReviewedAt).HasDefaultValueSql("GETUTCDATE()");
+        private void ConfigureFileMetadata(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<FileMetadata>()
+                .HasOne(f => f.UploadedByUser)
+                .WithMany()
+                .HasForeignKey(f => f.UploadedByUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
 
-                e.HasOne(sr => sr.Submission)
-                 .WithMany(s => s.Reviews)
-                 .HasForeignKey(sr => sr.SubmissionId)
-                 .OnDelete(DeleteBehavior.Cascade);
+        private void ConfigureSubmission(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Submission>()
+                .HasOne(s => s.Assignment)
+                .WithMany(a => a.Submissions)
+                .HasForeignKey(s => s.AssignmentId);
 
-                e.HasOne(sr => sr.ReviewedByUser)
-                 .WithMany(u => u.Reviews)
-                 .HasForeignKey(sr => sr.ReviewedByUserId)
-                 .OnDelete(DeleteBehavior.Restrict);
-            });
+            modelBuilder.Entity<Submission>()
+                .HasOne(s => s.Student)
+                .WithMany(u => u.Submissions)
+                .HasForeignKey(s => s.StudentUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
 
-           
-            builder.Entity<ProjectExecution>(e =>
-            {
-                e.ToTable("project_executions");
-                e.HasKey(pe => pe.Id);
-                e.Property(pe => pe.Id).HasDefaultValueSql("NEWSEQUENTIALID( )");
-                e.Property(pe => pe.ExecutionStatus).HasConversion<string>().HasMaxLength(20);
-                e.Property(pe => pe.StartedAt);
+        private void ConfigureProjectAsset(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProjectAsset>()
+                .HasKey(p => new { p.SubmissionId, p.FileMetadataId });
 
-                e.HasOne(pe => pe.ProjectAsset)
-                 .WithMany(pa => pa.Executions)
-                 .HasForeignKey(pe => pe.ProjectAssetId)
-                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ProjectAsset>()
+                .HasOne(p => p.Submission)
+                .WithMany(s => s.Assets)
+                .HasForeignKey(p => p.SubmissionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-                e.HasOne(pe => pe.TriggeredByUser)
-                 .WithMany(u => u.TriggeredExecutions)
-                 .HasForeignKey(pe => pe.TriggeredByUserId)
-                 .OnDelete(DeleteBehavior.Restrict);
-            });
+            modelBuilder.Entity<ProjectAsset>()
+                .HasOne(p => p.FileMetadata)
+                .WithMany()
+                .HasForeignKey(p => p.FileMetadataId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
 
+        private void ConfigureSubmissionReview(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<SubmissionReview>()
+                .HasOne(r => r.Submission)
+                .WithMany(s => s.Reviews)
+                .HasForeignKey(r => r.SubmissionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SubmissionReview>()
+                .HasOne(r => r.ReviewedByUser)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.ReviewedByUserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private void ConfigureSubmissionTestCase(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<SubmissionTestCase>()
+                .HasOne(tc => tc.SubmissionTest)
+                .WithMany(st => st.TestCases)
+                .HasForeignKey(tc => tc.SubmissionTestId);
+        }
+
+        private void ConfigureSubmissionTestExecution(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<SubmissionTestExecution>()
+                .HasOne(e => e.Submission)
+                .WithMany(s => s.TestExecutions)
+                .HasForeignKey(e => e.SubmissionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SubmissionTestExecution>()
+                .HasOne(e => e.SubmissionTest)
+                .WithMany()
+                .HasForeignKey(e => e.SubmissionTestId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SubmissionTestExecution>()
+                .HasOne(e => e.RanOnFile)
+                .WithMany()
+                .HasForeignKey(e => e.RanOnFileId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<SubmissionTestExecution>()
+                .HasOne(e => e.TriggeredByUser)
+                .WithMany(u => u.TriggeredExecutions)
+                .HasForeignKey(e => e.TriggeredByUserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private void AddRoles(ModelBuilder builder)
+        {
             var studentRoleId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var teacherRoleId = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var adminRoleId = Guid.Parse("33333333-3333-3333-3333-333333333333");

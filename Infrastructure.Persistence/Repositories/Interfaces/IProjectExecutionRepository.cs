@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories.Interfaces
 {
-    public interface IProjectExecutionRepository : IRepository<ProjectExecution> 
+    public interface IProjectExecutionRepository : IRepository<SubmissionTestExecution> 
     {
     }
 }

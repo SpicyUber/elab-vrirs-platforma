@@ -19,10 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\Assignment\" />
     <Folder Include="Commands\CourseEnrollment\" />
     <Folder Include="Commands\SubmissionReview\" />
-    <Folder Include="Commands\Submission\" />
     <Folder Include="Commands\ProjectExecution\" />
     <Folder Include="Commands\ProjectAsset\" />
     <Folder Include="Queries\Assignment\" />

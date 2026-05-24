@@ -46,11 +46,11 @@ namespace Application.Commands.User
             if (!result.Succeeded)
                 throw new InvalidOperationException(string.Join(", ", result.Errors.Select(e => e.Description)));
 
-            await userManager.AddToRoleAsync(user, "Student");
+            await userManager.AddToRoleAsync(user, request.Role.ToString());
 
             string token = await new JwtService(userManager,config).GenerateToken(user);
 
-            return new UserSessionInfo(user, "Student", token);
+            return new UserSessionInfo(user, request.Role.ToString(), token);
         }
 
       

@@ -9,12 +9,13 @@ namespace Domain.Entities
 {
     public class CourseEnrollment
     {
-        public Guid Id { get; set; }
         public Guid CourseId { get; set; }
         public Guid UserId { get; set; }
+
         public EnrollmentRole EnrollmentRole { get; set; }
         public DateTime EnrolledAt { get; set; }
-        public EnrollmentStatus Status { get; set; }
+
+        public EnrollmentStatus Status { get; set; } 
 
         public Course Course { get; set; } = null!;
         public User User { get; set; } = null!;

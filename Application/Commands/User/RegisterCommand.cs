@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.User;
+using Domain.Enums;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace Application.Commands.User
             public string FullName { get; set; } = string.Empty;
             public string Email { get; set; } = string.Empty;
             public string Password { get; set; } = string.Empty;
+            public SystemRole Role { get; set; }
         }
     
 }

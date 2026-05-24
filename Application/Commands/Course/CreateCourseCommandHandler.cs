@@ -24,6 +24,9 @@ namespace Application.Commands.Course
                 Description = request.Description,
                 CreatedByUserId = request.CreatedByUserId,
                 IsActive = true,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                Category = request.Category,
             };
 
             uow.CourseRepository.Add(course);

@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace VrirsAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/courses")]
     [ApiController]
-    [Authorize(Roles = "Teacher")]
+    
     public class CourseController : ControllerBase
     {
         private readonly IMediator mediator;
@@ -20,6 +20,7 @@ namespace VrirsAPI.Controllers
             this.mediator = mediator;
         }
 
+        [Authorize(Roles = "Teacher,Admin")]
         [HttpPost("create")]
         public async Task<ActionResult<CourseInfo>> CreateCourse([FromBody] CreateCourseInfo request)
         {
@@ -30,7 +31,10 @@ namespace VrirsAPI.Controllers
                 {
                     Name = request.Name,
                     Description = request.Description,
-                    CreatedByUserId = userId
+                    CreatedByUserId = userId,
+                    StartDate = request.StartDate,
+                    EndDate = request.EndDate,
+                    Category = request.Category
                 });
                 return Ok(course);
             }

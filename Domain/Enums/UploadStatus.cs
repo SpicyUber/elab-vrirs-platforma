@@ -1,4 +1,4 @@
 ﻿namespace Domain.Enums
 {
-    public enum UploadStatus { Uploaded, Validated, Failed }
+    public enum UploadStatus { UploadStarted, Validated, Failed }
 }

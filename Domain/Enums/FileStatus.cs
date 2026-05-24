@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Enums
 {
-    public enum AssignmentType
+    public enum FileStatus
     {
-        Class, Homework
+        Uploading, UploadSuccess, UploadFailed
     }
 }

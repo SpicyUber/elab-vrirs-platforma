@@ -17,7 +17,7 @@ namespace Application.Queries.Submission
 
         public async Task<List<SubmissionInfo>> Handle(GetAllSubmissionsByUserIdQuery request, CancellationToken cancellationToken)
         {
-            var allSubmissionsByIdRaw = uow.SubmissionRepository.GetAll().Where(s => s.StudentUserId.Equals(request.UserId)).ToList();
+            var allSubmissionsByIdRaw = uow.SubmissionRepository.Query().Where(s => s.StudentUserId.Equals(request.UserId)).ToList();
             var allSubmissionsById = allSubmissionsByIdRaw
                  .Select(s => new SubmissionInfo(s)).ToList();
 

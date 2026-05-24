@@ -19,6 +19,7 @@ namespace Infrastructure.Persistence.UnitOfWork.Interface
             public IUserRepository UserRepository { get; }
 
             public int SaveChanges();
+            public Task<int> SaveChangesAsync();
         }
 
 

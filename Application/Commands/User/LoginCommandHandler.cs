@@ -13,29 +13,29 @@ namespace Application.Commands.User
 {
     public class LoginCommandHandler : IRequestHandler<LoginCommand, UserSessionInfo>
     {
-        private readonly UserManager<Domain.Entities.User> _userManager;
-        private readonly IConfiguration _config;
+        private readonly UserManager<Domain.Entities.User> userManager;
+        private readonly IConfiguration config;
 
         public LoginCommandHandler(UserManager<Domain.Entities.User> userManager, IConfiguration config)
         {
-            _userManager = userManager;
-            _config = config;
+            this.userManager = userManager;
+            this.config = config;
         }
 
         public async Task<UserSessionInfo> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            var user = await userManager.FindByEmailAsync(request.Email);
             if (user == null || !user.IsActive)
                 throw new UnauthorizedAccessException("Invalid credentials.");
 
-            var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+            var passwordValid = await userManager.CheckPasswordAsync(user, request.Password);
             if (!passwordValid)
                 throw new UnauthorizedAccessException("Invalid credentials.");
 
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = await userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? "Student";
 
-            var token = await new JwtService(_userManager, _config).GenerateToken(user);
+            var token = await new JwtService(userManager, config).GenerateToken(user);
 
             return new UserSessionInfo(user, role, token);
         }

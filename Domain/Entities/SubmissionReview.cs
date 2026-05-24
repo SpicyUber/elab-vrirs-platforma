@@ -11,14 +11,16 @@ namespace Domain.Entities
     {
         public Guid Id { get; set; }
         public Guid SubmissionId { get; set; }
-        public Guid ReviewedByUserId { get; set; }
+
+        public Guid? ReviewedByUserId { get; set; } = null;
         public ReviewStatus ReviewStatus { get; set; }
+
         public string? ReviewComment { get; set; }
         public DateTime ReviewedAt { get; set; }
 
         public int Points { get; set; }
 
         public Submission Submission { get; set; } = null!;
-        public User ReviewedByUser { get; set; } = null!;
+        public User? ReviewedByUser { get; set; } = null;
     }
 }

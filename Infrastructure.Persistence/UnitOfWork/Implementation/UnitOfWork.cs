@@ -35,9 +35,7 @@ namespace Infrastructure.Persistence.UnitOfWork.Implementation
             UserRepository = new UserRepository(this.context);
         }
 
-        public int SaveChanges()
-        {
-            throw new NotImplementedException();
-        }
+        public int SaveChanges() => context.SaveChanges();
+        public async Task<int> SaveChangesAsync() => await context.SaveChangesAsync();
     }
 }

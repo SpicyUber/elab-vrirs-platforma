@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Course;
+using Domain.Enums;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,11 @@ namespace Application.Commands.Course
         public string Name { get; set; } = string.Empty;
 
         public string? Description { get; set; }
+
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+
+        public CourseCategory Category { get; set; }
 
         public Guid CreatedByUserId { get; set; }
     }

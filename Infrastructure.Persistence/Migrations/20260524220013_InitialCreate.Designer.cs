@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(VrirsDbContext))]
-    [Migration("20260522214451_InitialCreate")]
+    [Migration("20260524220013_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -30,8 +30,7 @@ namespace Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID( )");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("AllowMultipleAttempts")
                         .HasColumnType("bit");
@@ -39,26 +38,26 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<bool>("AllowProjectUpload")
                         .HasColumnType("bit");
 
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DueAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("ExampleProjectId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("Location")
+                        .HasColumnType("int");
 
                     b.Property<int>("MaxPoints")
                         .HasColumnType("int");
@@ -69,26 +68,18 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("OpensAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ProjectCategory")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<Guid?>("SubmissionTestId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -96,32 +87,52 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("ExampleProjectId");
+                    b.HasIndex("SubmissionTestId");
 
-                    b.ToTable("assignments", "vrirs");
+                    b.ToTable("Assignments", "vrirs", t =>
+                        {
+                            t.HasCheckConstraint("CK_Assignment_Points", "[MinPoints] >= 0 AND [MaxPoints] >= [MinPoints]");
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Entities.AssignmentAsset", b =>
+                {
+                    b.Property<Guid>("AssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FileMetadataId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AssetType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UploadStatus")
+                        .HasColumnType("int");
+
+                    b.HasKey("AssignmentId", "FileMetadataId");
+
+                    b.HasIndex("FileMetadataId");
+
+                    b.ToTable("AssignmentAssets", "vrirs");
                 });
 
             modelBuilder.Entity("Domain.Entities.Course", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID( )");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
@@ -131,174 +142,127 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.ToTable("courses", "vrirs");
+                    b.ToTable("Courses", "vrirs");
                 });
 
             modelBuilder.Entity("Domain.Entities.CourseEnrollment", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID( )");
-
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("EnrolledAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("EnrollmentRole")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.Property<DateTime>("EnrolledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EnrollmentRole")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("CourseId", "UserId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("CourseId", "UserId")
-                        .IsUnique();
+                    b.ToTable("CourseEnrollments", "vrirs");
+                });
 
-                    b.ToTable("course_enrollments", "vrirs");
+            modelBuilder.Entity("Domain.Entities.FileMetadata", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Mime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("SizeInBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UploadedByUserId");
+
+                    b.ToTable("FileMetadata", "vrirs");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProjectAsset", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID( )");
-
-                    b.Property<string>("AssetType")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<long>("FileSize")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("MimeType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<Guid>("SubmissionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UploadStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubmissionId");
-
-                    b.ToTable("project_assets", "vrirs");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ProjectExecution", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID( )");
-
-                    b.Property<string>("ErrorLog")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ExecutionStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime?>("FinishedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OutputLog")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ProjectAssetId")
+                    b.Property<Guid>("FileMetadataId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("StartedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("AssetType")
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("TriggeredByUserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("UploadStatus")
+                        .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("SubmissionId", "FileMetadataId");
 
-                    b.HasIndex("ProjectAssetId");
+                    b.HasIndex("FileMetadataId");
 
-                    b.HasIndex("TriggeredByUserId");
-
-                    b.ToTable("project_executions", "vrirs");
+                    b.ToTable("ProjectAssets", "vrirs");
                 });
 
             modelBuilder.Entity("Domain.Entities.Submission", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID( )");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("AssignmentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("StudentUserId")
                         .HasColumnType("uniqueidentifier");
@@ -308,13 +272,10 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -322,34 +283,28 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("StudentUserId");
 
-                    b.ToTable("submissions", "vrirs");
+                    b.ToTable("Submissions", "vrirs");
                 });
 
             modelBuilder.Entity("Domain.Entities.SubmissionReview", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID( )");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Points")
                         .HasColumnType("int");
 
                     b.Property<string>("ReviewComment")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ReviewStatus")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                    b.Property<int>("ReviewStatus")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("ReviewedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ReviewedByUserId")
+                    b.Property<Guid?>("ReviewedByUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SubmissionId")
@@ -361,31 +316,100 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("SubmissionId");
 
-                    b.ToTable("submission_reviews", "vrirs");
+                    b.ToTable("SubmissionReviews", "vrirs");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SubmissionTest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SubmissionTests", "vrirs");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SubmissionTestCase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SubmissionTestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubmissionTestId");
+
+                    b.ToTable("SubmissionTestCases", "vrirs");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SubmissionTestExecution", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ErrorLog")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ExecutionStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OutputLog")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("RanOnFileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SubmissionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SubmissionTestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("TriggeredByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RanOnFileId");
+
+                    b.HasIndex("SubmissionId");
+
+                    b.HasIndex("SubmissionTestId");
+
+                    b.HasIndex("TriggeredByUserId");
+
+                    b.ToTable("SubmissionTestExecutions", "vrirs");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID( )");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("AvatarFilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("AvatarFileId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -396,11 +420,9 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IndexNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
@@ -436,15 +458,15 @@ namespace Infrastructure.Persistence.Migrations
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AvatarFileId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -454,7 +476,7 @@ namespace Infrastructure.Persistence.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("users", "vrirs");
+                    b.ToTable("AspNetUsers", "vrirs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -482,7 +504,7 @@ namespace Infrastructure.Persistence.Migrations
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("roles", "vrirs");
+                    b.ToTable("AspNetRoles", "vrirs");
 
                     b.HasData(
                         new
@@ -526,7 +548,7 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("role_claims", "vrirs");
+                    b.ToTable("AspNetRoleClaims", "vrirs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
@@ -550,7 +572,7 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("user_claims", "vrirs");
+                    b.ToTable("AspNetUserClaims", "vrirs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
@@ -571,7 +593,7 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("user_logins", "vrirs");
+                    b.ToTable("AspNetUserLogins", "vrirs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
@@ -586,7 +608,7 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("user_roles", "vrirs");
+                    b.ToTable("AspNetUserRoles", "vrirs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
@@ -605,7 +627,7 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("user_tokens", "vrirs");
+                    b.ToTable("AspNetUserTokens", "vrirs");
                 });
 
             modelBuilder.Entity("Domain.Entities.Assignment", b =>
@@ -622,15 +644,34 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.ProjectAsset", "ExampleProject")
+                    b.HasOne("Domain.Entities.SubmissionTest", "SubmissionTest")
                         .WithMany()
-                        .HasForeignKey("ExampleProjectId");
+                        .HasForeignKey("SubmissionTestId");
 
                     b.Navigation("Course");
 
                     b.Navigation("CreatedByUser");
 
-                    b.Navigation("ExampleProject");
+                    b.Navigation("SubmissionTest");
+                });
+
+            modelBuilder.Entity("Domain.Entities.AssignmentAsset", b =>
+                {
+                    b.HasOne("Domain.Entities.Assignment", "Assignment")
+                        .WithMany("AssignmentAssets")
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.FileMetadata", "FileMetadata")
+                        .WithMany()
+                        .HasForeignKey("FileMetadataId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Assignment");
+
+                    b.Navigation("FileMetadata");
                 });
 
             modelBuilder.Entity("Domain.Entities.Course", b =>
@@ -663,34 +704,34 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Domain.Entities.FileMetadata", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "UploadedByUser")
+                        .WithMany()
+                        .HasForeignKey("UploadedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UploadedByUser");
+                });
+
             modelBuilder.Entity("Domain.Entities.ProjectAsset", b =>
                 {
+                    b.HasOne("Domain.Entities.FileMetadata", "FileMetadata")
+                        .WithMany()
+                        .HasForeignKey("FileMetadataId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Submission", "Submission")
                         .WithMany("Assets")
                         .HasForeignKey("SubmissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("FileMetadata");
+
                     b.Navigation("Submission");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ProjectExecution", b =>
-                {
-                    b.HasOne("Domain.Entities.ProjectAsset", "ProjectAsset")
-                        .WithMany("Executions")
-                        .HasForeignKey("ProjectAssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", "TriggeredByUser")
-                        .WithMany("TriggeredExecutions")
-                        .HasForeignKey("TriggeredByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ProjectAsset");
-
-                    b.Navigation("TriggeredByUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.Submission", b =>
@@ -704,7 +745,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Entities.User", "Student")
                         .WithMany("Submissions")
                         .HasForeignKey("StudentUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Assignment");
@@ -717,8 +758,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Domain.Entities.User", "ReviewedByUser")
                         .WithMany("Reviews")
                         .HasForeignKey("ReviewedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Domain.Entities.Submission", "Submission")
                         .WithMany("Reviews")
@@ -729,6 +769,60 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("ReviewedByUser");
 
                     b.Navigation("Submission");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SubmissionTestCase", b =>
+                {
+                    b.HasOne("Domain.Entities.SubmissionTest", "SubmissionTest")
+                        .WithMany("TestCases")
+                        .HasForeignKey("SubmissionTestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SubmissionTest");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SubmissionTestExecution", b =>
+                {
+                    b.HasOne("Domain.Entities.FileMetadata", "RanOnFile")
+                        .WithMany()
+                        .HasForeignKey("RanOnFileId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Domain.Entities.Submission", "Submission")
+                        .WithMany("TestExecutions")
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.SubmissionTest", "SubmissionTest")
+                        .WithMany()
+                        .HasForeignKey("SubmissionTestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "TriggeredByUser")
+                        .WithMany("TriggeredExecutions")
+                        .HasForeignKey("TriggeredByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("RanOnFile");
+
+                    b.Navigation("Submission");
+
+                    b.Navigation("SubmissionTest");
+
+                    b.Navigation("TriggeredByUser");
+                });
+
+            modelBuilder.Entity("Domain.Entities.User", b =>
+                {
+                    b.HasOne("Domain.Entities.FileMetadata", "AvatarFile")
+                        .WithMany()
+                        .HasForeignKey("AvatarFileId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("AvatarFile");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -784,6 +878,8 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Assignment", b =>
                 {
+                    b.Navigation("AssignmentAssets");
+
                     b.Navigation("Submissions");
                 });
 
@@ -794,16 +890,18 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("Enrollments");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ProjectAsset", b =>
-                {
-                    b.Navigation("Executions");
-                });
-
             modelBuilder.Entity("Domain.Entities.Submission", b =>
                 {
                     b.Navigation("Assets");
 
                     b.Navigation("Reviews");
+
+                    b.Navigation("TestExecutions");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SubmissionTest", b =>
+                {
+                    b.Navigation("TestCases");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>

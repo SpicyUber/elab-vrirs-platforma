@@ -21,7 +21,13 @@ namespace VrirsAPI.Controllers
             this.mediator = mediator;
             
         }
-        
+        /*TODO: IMPLEMENT!
+        [HttpGet("course/{courseId}")]
+        public async Task<ActionResult<List<UserCourseEnrollmentInfo>>>(Guid courseId)
+        {
+            
+        }
+        */
 
         [HttpPost("register")]
         public async Task<ActionResult<UserSessionInfo>> Register([FromBody] RegisterCommand request)

@@ -1,5 +1,8 @@
 ﻿using Application.Commands.Course;
 using Application.DTOs.Course;
+using Application.Queries.Course;
+using Application.Queries.Submission;
+using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +13,7 @@ namespace VrirsAPI.Controllers
 {
     [Route("api/courses")]
     [ApiController]
-    
+
     public class CourseController : ControllerBase
     {
         private readonly IMediator mediator;
@@ -22,7 +25,7 @@ namespace VrirsAPI.Controllers
 
         [Authorize(Roles = "Teacher,Admin")]
         [HttpPost("create")]
-        public async Task<ActionResult<CourseInfo>> CreateCourse([FromBody] CreateCourseInfo request)
+        public async Task<ActionResult<CourseInfo>> Post([FromBody] CreateCourseInfo request)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             try
@@ -39,7 +42,25 @@ namespace VrirsAPI.Controllers
                 return Ok(course);
             }
             catch(InvalidOperationException e) { return BadRequest(e.Message); }
-            
+
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("all")]
+        public async Task<ActionResult<List<CourseInfo>>> GetAll()
+        {
+            return Ok(await mediator.Send(new GetAllCoursesQuery()));
+        }
+
+        [Authorize(Roles = "Teacher,Student,Admin")]
+        [HttpGet("mine")]
+        public async Task<ActionResult<List<CourseInfo>>> GetAllByUserId()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if(userId == null) return Forbid();
+
+            return Ok(await mediator.Send(new GetAllCoursesByUserIdQuery() { UserId = Guid.Parse(userId) }));
+        }
+
     }
 }

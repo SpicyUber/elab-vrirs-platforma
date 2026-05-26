@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Course;
 using Infrastructure.Persistence.UnitOfWork.Interface;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +15,10 @@ namespace Application.Commands.Course
         private readonly IUnitOfWork uow;
 
         public CreateCourseCommandHandler(IUnitOfWork uow) { this.uow = uow; }
-        public Task<CourseInfo> Handle(CreateCourseCommand request, CancellationToken cancellationToken)
+        public async Task<CourseInfo> Handle(CreateCourseCommand request, CancellationToken cancellationToken)
         {
 
-            if (string.IsNullOrEmpty(request.Name)) throw new InvalidOperationException("Name is required.");
+            if(string.IsNullOrEmpty(request.Name)) throw new InvalidOperationException("Name is required.");
             var course = new Domain.Entities.Course
             {
                 Name = request.Name,
@@ -30,9 +31,11 @@ namespace Application.Commands.Course
             };
 
             uow.CourseRepository.Add(course);
-            uow.SaveChanges();
+            await uow.SaveChangesAsync();
 
-            return Task.FromResult(new CourseInfo(course));
+            course = await uow.CourseRepository.Query().Include(c => c.CreatedByUser).FirstAsync(c => c.Id == course.Id);
+
+            return new CourseInfo(course);
         }
     }
 }

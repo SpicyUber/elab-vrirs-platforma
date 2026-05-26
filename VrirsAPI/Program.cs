@@ -2,16 +2,16 @@ using Application;
 using Application.Services;
 using Domain.Entities;
 using Infrastructure.Persistence;
+using Infrastructure.Persistence.FileService.Implementation;
+using Infrastructure.Persistence.FileService.Interfaces;
+using Infrastructure.Persistence.FileService.Options;
 using Infrastructure.Persistence.UnitOfWork.Implementation;
 using Infrastructure.Persistence.UnitOfWork.Interface;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Numerics;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -31,7 +31,7 @@ namespace VrirsAPI
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            if(app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
@@ -43,7 +43,7 @@ namespace VrirsAPI
             app.UseAuthorization();
 
             app.MapControllers();
-            
+
             app.Run();
         }
 
@@ -82,17 +82,22 @@ namespace VrirsAPI
 
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options => { options.Password.RequiredLength = 6; options.User.RequireUniqueEmail = true; options.SignIn.RequireConfirmedEmail = false; })
                 .AddEntityFrameworkStores<VrirsDbContext>();
-           
+
             builder.Services.AddDbContext<VrirsDbContext>((options) => { options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")); });
-            
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
         }
 
-        
+        private static void SetupAzureBlobStorage(WebApplicationBuilder builder)
+        {
+            var defaultConnection = builder.Configuration.GetSection("FileStorage:DefaultConnection");
+            builder.Services.Configure<AzureBlobStorageOptions>(defaultConnection);
+            builder.Services.AddSingleton<IFileService, FileService>();
+        }
 
-        private static void SetupMediatR(WebApplicationBuilder builder)=> builder.Services.AddMediatR(cfg => { cfg.LicenseKey = builder.Configuration.GetSection("MediatR")["Key"]; cfg.RegisterServicesFromAssembly(typeof(MediatRHook).Assembly); });
+        private static void SetupMediatR(WebApplicationBuilder builder) => builder.Services.AddMediatR(cfg => { cfg.LicenseKey = builder.Configuration.GetSection("MediatR")["Key"]; cfg.RegisterServicesFromAssembly(typeof(MediatRHook).Assembly); });
 
 
         private static void AddDependencyInjections(WebApplicationBuilder builder)
@@ -101,6 +106,7 @@ namespace VrirsAPI
             builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             builder.Services.AddScoped<IMediator, Mediator>();
             builder.Services.AddScoped<JwtService>();
+            SetupAzureBlobStorage(builder);
         }
     }
 

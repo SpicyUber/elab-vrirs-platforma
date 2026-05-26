@@ -23,9 +23,7 @@
     <Folder Include="Commands\SubmissionReview\" />
     <Folder Include="Commands\ProjectExecution\" />
     <Folder Include="Commands\ProjectAsset\" />
-    <Folder Include="Queries\Assignment\" />
     <Folder Include="Queries\CourseEnrollment\" />
-    <Folder Include="Queries\Course\" />
     <Folder Include="Queries\User\" />
     <Folder Include="Queries\ProjectAsset\" />
     <Folder Include="Queries\ProjectExecution\" />

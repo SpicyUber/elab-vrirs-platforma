@@ -13,6 +13,9 @@ namespace Application.DTOs.Submission
         public Guid Id { get; set; }
         public Guid AssignmentId { get; set; }
         public Guid StudentUserId { get; set; }
+        public string AssignmentTitle { get; set; }
+        public string StudentFullName { get; set; }
+        public string? StudentIndex { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public SubmissionStatus Status { get; set; } = SubmissionStatus.Draft;
@@ -23,6 +26,9 @@ namespace Application.DTOs.Submission
             Id = submission.Id;
             AssignmentId = submission.AssignmentId;
             StudentUserId = submission.StudentUserId;
+            AssignmentTitle = submission.Assignment?.Title ?? "Unknown";
+            StudentFullName = submission.Student?.FullName ?? "Unknown";
+            StudentIndex = submission.Student?.IndexNumber;
             Title = submission.Title;
             Description = submission.Description;
             Status = submission.Status;

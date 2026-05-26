@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Submission;
 using Infrastructure.Persistence.UnitOfWork.Interface;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +18,12 @@ namespace Application.Queries.Submission
 
         public async Task<List<SubmissionInfo>> Handle(GetAllSubmissionsByUserIdQuery request, CancellationToken cancellationToken)
         {
-            var allSubmissionsByIdRaw = uow.SubmissionRepository.Query().Where(s => s.StudentUserId.Equals(request.UserId)).ToList();
-            var allSubmissionsById = allSubmissionsByIdRaw
-                 .Select(s => new SubmissionInfo(s)).ToList();
-
-            return allSubmissionsById;
+            return await uow.SubmissionRepository.Query()
+                .Include(s => s.Student)
+                .Include(s => s.Assignment)
+                .Where(s => s.StudentUserId.Equals(request.UserId))
+                .Select(s => new SubmissionInfo(s))
+                .ToListAsync(cancellationToken);
         }
     }
 }

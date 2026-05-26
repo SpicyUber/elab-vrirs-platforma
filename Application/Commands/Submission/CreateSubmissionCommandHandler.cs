@@ -1,20 +1,17 @@
-﻿using Infrastructure.Persistence.UnitOfWork.Interface;
+﻿using Application.DTOs.Submission;
+using Infrastructure.Persistence.UnitOfWork.Interface;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Commands.Submission
 {
-    public class CreateSubmissionCommandHandler : IRequestHandler<CreateSubmissionCommand, Domain.Entities.Submission>
+    public class CreateSubmissionCommandHandler : IRequestHandler<CreateSubmissionCommand, SubmissionInfo>
     {
         private readonly IUnitOfWork uow;
 
         public CreateSubmissionCommandHandler(IUnitOfWork uow) { this.uow = uow; }
 
-        public async Task<Domain.Entities.Submission> Handle(CreateSubmissionCommand request, CancellationToken cancellationToken)
+        public async Task<SubmissionInfo> Handle(CreateSubmissionCommand request, CancellationToken cancellationToken)
         {
             var newSubmission = new Domain.Entities.Submission()
             {
@@ -24,10 +21,11 @@ namespace Application.Commands.Submission
             };
 
             uow.SubmissionRepository.Add(newSubmission);
+            await uow.SaveChangesAsync();
 
-            uow.SaveChanges();
+            newSubmission = await uow.SubmissionRepository.Query().Include(s => s.Student).Include(s => s.Assignment).FirstAsync(s => s.Id == newSubmission.Id);
 
-            return newSubmission;
+            return new SubmissionInfo(newSubmission);
         }
     }
 }

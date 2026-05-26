@@ -16,6 +16,7 @@ namespace Application.DTOs.Course
         public string? Description { get; set; }
 
         public Guid CreatedByUserId { get; set; } = Guid.Empty;
+        public string CreatedByUserFullName { get; set; }
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -31,6 +32,7 @@ namespace Application.DTOs.Course
             this.StartDate = course.StartDate;
             this.EndDate = course.EndDate;
             this.Category = course.Category;
+            this.CreatedByUserFullName = course.CreatedByUser?.FullName ?? "Unknown";
         }
     }
 }

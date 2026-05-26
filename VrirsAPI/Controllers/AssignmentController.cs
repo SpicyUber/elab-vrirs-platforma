@@ -1,4 +1,6 @@
 ﻿using Application.Commands.Assignment;
+using Application.DTOs.Assignment;
+using Application.Queries.Assignment;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -32,6 +34,21 @@ namespace VrirsAPI.Controllers
             });
 
             return Ok(result);
+        }
+
+        [Authorize(Roles = "Teacher,Admin,Student")]
+        [HttpPost("course/{courseId}")]
+        public async Task<ActionResult<List<AssignmentInfo>>> GetAllByCourseId(Guid courseId)
+        {
+            return Ok(
+                await mediator.Send
+                (
+                    new GetAllAssignmentsByCourseIdQuery()
+                    {
+                        CourseId = courseId
+                    }
+                )
+            );
         }
     }
 }

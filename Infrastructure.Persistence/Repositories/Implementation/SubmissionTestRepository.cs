@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories.Implementation
 {
-    public class ProjectExecutionRepository : GenericRepository<SubmissionTestExecution>, IProjectExecutionRepository
+    public class SubmissionTestRepository : GenericRepository<SubmissionTest>, ISubmissionTestRepository
     {
-        public ProjectExecutionRepository(VrirsDbContext context) : base(context)
+        public SubmissionTestRepository(VrirsDbContext context) : base(context)
         {
         }
     }

@@ -13,10 +13,14 @@ namespace Infrastructure.Persistence.UnitOfWork.Interface
             public ICourseEnrollmentRepository CourseEnrollmentRepository { get; }
             public ICourseRepository CourseRepository { get; }
             public IProjectAssetRepository ProjectAssetRepository { get; }
-            public IProjectExecutionRepository ProjectExecutionRepository { get; }
+            public ISubmissionTestExecutionRepository ProjectExecutionRepository { get; }
             public ISubmissionRepository SubmissionRepository { get; }
             public ISubmissionReviewRepository SubmissionReviewRepository { get; }
             public IUserRepository UserRepository { get; }
+            public ISubmissionTestCaseRepository SubmissionTestCaseRepository { get; }
+            public ISubmissionTestRepository SubmissionTestRepository { get; }
+            public IAssignmentAssetRepository AssignmentAssetRepository { get; }
+            public IFileMetadataRepository FileMetadataRepository { get; }
 
             public int SaveChanges();
             public Task<int> SaveChangesAsync();

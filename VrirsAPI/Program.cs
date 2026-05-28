@@ -92,9 +92,9 @@ namespace VrirsAPI
 
         private static void SetupAzureBlobStorage(WebApplicationBuilder builder)
         {
-            var defaultConnection = builder.Configuration.GetSection("FileStorage:DefaultConnection");
-            builder.Services.Configure<AzureBlobStorageOptions>(defaultConnection);
-            builder.Services.AddSingleton<IFileService, FileService>();
+            var fileStorageSection = builder.Configuration.GetSection("FileStorage");
+            builder.Services.Configure<AzureBlobStorageOptions>(fileStorageSection);
+            builder.Services.AddSingleton<IFileService<Stream>, FileService>();
         }
 
         private static void SetupMediatR(WebApplicationBuilder builder) => builder.Services.AddMediatR(cfg => { cfg.LicenseKey = builder.Configuration.GetSection("MediatR")["Key"]; cfg.RegisterServicesFromAssembly(typeof(MediatRHook).Assembly); });

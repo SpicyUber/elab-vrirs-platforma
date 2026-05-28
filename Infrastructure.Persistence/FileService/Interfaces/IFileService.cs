@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.FileService.Interfaces
 {
-    public interface IFileService
+    public interface IFileService<T>
     {
-        public Task UploadAsync(byte[] bytes,string path,CancellationToken cancellationToken);
+        public Task UploadAsync(T content,string path,CancellationToken cancellationToken);
 
         public Task DeleteAsync(string path, CancellationToken cancellationToken);
 
-        public Task<byte[]> DownloadAsync(string path, CancellationToken cancellationToken);
+        public Task<T> DownloadAsync(string path, CancellationToken cancellationToken);
     }
 }

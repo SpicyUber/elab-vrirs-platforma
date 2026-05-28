@@ -10,5 +10,6 @@ namespace Infrastructure.Persistence.FileService.Options
     public class AzureBlobStorageOptions
     {
         public string ConnectionString { get; set; }
+        public string BlobContainerName { get; set; }
     }
 }

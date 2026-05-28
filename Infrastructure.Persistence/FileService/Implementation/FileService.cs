@@ -7,11 +7,11 @@ using System.IO;
 
 namespace Infrastructure.Persistence.FileService.Implementation
 {
-    public class FileService : IFileService
+    public class FileService : IFileService<Stream>
     {
         private readonly AzureBlobStorageOptions options;
 
-        private BlobClient CreateBlobClient(string path) => new(options.ConnectionString, "vrirs", path);
+        private BlobClient CreateBlobClient(string path) => new(options.ConnectionString, options.BlobContainerName, path);
 
         public FileService(IOptions<AzureBlobStorageOptions> options)
         {
@@ -21,28 +21,24 @@ namespace Infrastructure.Persistence.FileService.Implementation
         public async Task DeleteAsync(string path, CancellationToken cancellationToken)
         {
             var blobClient = CreateBlobClient(path);
-            var azureResponse = await blobClient.DeleteAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: cancellationToken);
+            await blobClient.DeleteAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: cancellationToken);
         }
 
-        public async Task<byte[]> DownloadAsync(string path, CancellationToken cancellationToken)
+        public async Task<Stream> DownloadAsync(string path, CancellationToken cancellationToken)
         {
             var blobClient = CreateBlobClient(path);
             var blobReadOptions = new BlobOpenReadOptions(allowModifications: false);
 
-            using Stream azureStream = await blobClient.OpenReadAsync(blobReadOptions, cancellationToken);
-            using MemoryStream memoryStream = new();
-
-            await azureStream.CopyToAsync(memoryStream, cancellationToken);
-            return memoryStream.ToArray();
-
+            return await blobClient.OpenReadAsync(blobReadOptions, cancellationToken);
         }
 
-        public async Task UploadAsync(byte[] bytes, string path, CancellationToken cancellationToken)
+        public async Task UploadAsync(Stream content, string path, CancellationToken cancellationToken)
         {
             var blobClient = CreateBlobClient(path);
+            using MemoryStream memoryStream = new();
 
-            using MemoryStream memoryStream = new(bytes);
-            await blobClient.UploadAsync(memoryStream, cancellationToken);
+            await content.CopyToAsync(memoryStream, cancellationToken);
+            await blobClient.UploadAsync(content, cancellationToken);
         }
     }
 }

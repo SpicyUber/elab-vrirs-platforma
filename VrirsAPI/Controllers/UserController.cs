@@ -1,5 +1,7 @@
 ﻿using Application.Commands.User;
+using Application.DTOs.CourseEnrollment;
 using Application.DTOs.User;
+using Application.Queries.CourseEnrollment;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Persistence.UnitOfWork.Interface;
@@ -19,15 +21,20 @@ namespace VrirsAPI.Controllers
         public UserController(IMediator mediator)
         {
             this.mediator = mediator;
-            
+
         }
-        /*TODO: IMPLEMENT!
-        [HttpGet("course/{courseId}")]
-        public async Task<ActionResult<List<UserCourseEnrollmentInfo>>>(Guid courseId)
+
+        [HttpGet("enrolled-in/{courseId}")]
+        public async Task<ActionResult<List<UserCourseEnrollmentInfo>>> GetEnrolledUsers(Guid courseId)
         {
-            
+            var request = new GetAllCourseEnrollmentsByCourseIdQuery() { CourseId = courseId };
+
+            var response = await mediator.Send(request);
+            return Ok(response);
         }
-        */
+
+        /*[HttpPut("avatar-upload")]
+        public async Task<ActionResult<>>*/
 
         [HttpPost("register")]
         public async Task<ActionResult<UserSessionInfo>> Register([FromBody] RegisterCommand request)
@@ -36,7 +43,8 @@ namespace VrirsAPI.Controllers
             {
                 var response = await mediator.Send(request);
                 return Ok(response);
-            }catch(InvalidOperationException e)
+            }
+            catch(InvalidOperationException e)
             {
                 return BadRequest(e.Message);
             }
@@ -50,7 +58,7 @@ namespace VrirsAPI.Controllers
                 var response = await mediator.Send(request);
                 return Ok(response);
             }
-            catch (UnauthorizedAccessException e)
+            catch(UnauthorizedAccessException e)
             {
                 return BadRequest(e.Message);
             }

@@ -9,10 +9,10 @@ namespace Infrastructure.Persistence.FileService.Interfaces
 {
     public interface IFileService
     {
-        public Task UploadAsync(Stream stream,string path,CancellationToken cancellationToken);
+        public Task UploadAsync(byte[] bytes,string path,CancellationToken cancellationToken);
 
         public Task DeleteAsync(string path, CancellationToken cancellationToken);
 
-        public Task DownloadAsync(string path, CancellationToken cancellationToken);
+        public Task<byte[]> DownloadAsync(string path, CancellationToken cancellationToken);
     }
 }

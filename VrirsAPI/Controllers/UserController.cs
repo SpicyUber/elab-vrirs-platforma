@@ -51,7 +51,7 @@ namespace VrirsAPI.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserSessionInfo>> Register([FromBody] LoginCommand request)
+        public async Task<ActionResult<UserSessionInfo>> Login([FromBody] LoginCommand request)
         {
             try
             {

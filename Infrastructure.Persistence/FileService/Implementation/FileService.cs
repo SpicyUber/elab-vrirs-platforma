@@ -35,9 +35,6 @@ namespace Infrastructure.Persistence.FileService.Implementation
         public async Task UploadAsync(Stream content, string path, CancellationToken cancellationToken)
         {
             var blobClient = CreateBlobClient(path);
-            using MemoryStream memoryStream = new();
-
-            await content.CopyToAsync(memoryStream, cancellationToken);
             await blobClient.UploadAsync(content, cancellationToken);
         }
     }

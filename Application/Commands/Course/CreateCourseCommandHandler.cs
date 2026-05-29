@@ -31,7 +31,7 @@ namespace Application.Commands.Course
             };
 
             uow.CourseRepository.Add(course);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             course = await uow.CourseRepository.Query().Include(c => c.CreatedByUser).FirstAsync(c => c.Id == course.Id);
 

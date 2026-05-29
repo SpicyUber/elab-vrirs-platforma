@@ -21,7 +21,7 @@ namespace Application.Commands.Submission
             };
 
             uow.SubmissionRepository.Add(newSubmission);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             newSubmission = await uow.SubmissionRepository.Query().Include(s => s.Student).Include(s => s.Assignment).FirstAsync(s => s.Id == newSubmission.Id);
 

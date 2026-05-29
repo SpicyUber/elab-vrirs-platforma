@@ -50,6 +50,6 @@ namespace Infrastructure.Persistence.UnitOfWork.Implementation
         }
 
         public int SaveChanges() => context.SaveChanges();
-        public async Task<int> SaveChangesAsync() => await context.SaveChangesAsync();
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken) => await context.SaveChangesAsync(cancellationToken);
     }
 }

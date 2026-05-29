@@ -27,7 +27,7 @@ namespace Application.Commands.Assignment
             };
 
             uow.AssignmentRepository.Add(newAssignment);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             newAssignment = await uow.AssignmentRepository.Query().Include(a => a.Course).Include(a => a.CreatedByUser).FirstAsync(a => a.Id == newAssignment.Id);
 

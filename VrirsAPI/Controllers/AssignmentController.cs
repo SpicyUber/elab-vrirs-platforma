@@ -23,7 +23,7 @@ namespace VrirsAPI.Controllers
 
         [Authorize(Roles = "Teacher,Admin")]
         [HttpPost("course/{courseId}")]
-        public async Task<ActionResult<Assignment>> Post(Guid courseId)
+        public async Task<ActionResult<AssignmentInfo>> Post(Guid courseId)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
@@ -38,7 +38,7 @@ namespace VrirsAPI.Controllers
 
         [Authorize(Roles = "Teacher")]
         [HttpPut("course/{courseId}")]
-        public async Task<ActionResult<Assignment>> Edit([FromBody] EditAssignmentCommand request)
+        public async Task<ActionResult<AssignmentInfo>> Edit([FromBody] EditAssignmentCommand request)
         {
             try
             {

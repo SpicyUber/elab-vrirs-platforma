@@ -9,6 +9,7 @@ using Infrastructure.Persistence.UnitOfWork.Implementation;
 using Infrastructure.Persistence.UnitOfWork.Interface;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,9 +30,9 @@ namespace VrirsAPI
             AddServices(builder);
             SetupMediatR(builder);
             SetupJWTAuth(builder);
-
+            
             var app = builder.Build();
-
+           
             // Configure the HTTP request pipeline.
             if(app.Environment.IsDevelopment())
             {

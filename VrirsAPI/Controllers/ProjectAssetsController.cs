@@ -22,6 +22,7 @@ namespace VrirsAPI.Controllers
 
         [Authorize(Roles = "Student")]
         [Consumes("multipart/form-data")]
+        [RequestSizeLimit(100_000_000)]
         [HttpPost("{submissionId}/assets")]
         public async Task<ActionResult<ProjectAssetInfo>> PostAsset(IFormFile asset, Guid submissionId)
         {

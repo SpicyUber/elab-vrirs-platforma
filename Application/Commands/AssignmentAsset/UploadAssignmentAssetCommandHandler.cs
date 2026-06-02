@@ -159,7 +159,7 @@ namespace Application.Commands.AssignmentAsset
         public void ValidateFileUpload(UploadAssignmentAssetCommand request)
         {
             if(request.SizeInBytes > uploadOptions.FileSizeLimitInBytes)
-                throw new InvalidOperationException($"Asset must be under {uploadOptions.AvatarSizeLimitInBytes / 1024} KB.");
+                throw new InvalidOperationException($"Asset must be under {uploadOptions.FileSizeLimitInBytes / 1024} KB.");
             if(request.Name.Length == 0)
                 throw new InvalidOperationException("File name cannot be empty.");
         }

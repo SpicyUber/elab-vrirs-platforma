@@ -1,6 +1,8 @@
 ﻿using Application.DTOs.Course;
+using Domain.Entities;
 using Infrastructure.Persistence.UnitOfWork.Interface;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,8 +15,13 @@ namespace Application.Commands.Course
     public class CreateCourseCommandHandler : IRequestHandler<CreateCourseCommand, CourseInfo>
     {
         private readonly IUnitOfWork uow;
+        private readonly UserManager<Domain.Entities.User> userManager;
 
-        public CreateCourseCommandHandler(IUnitOfWork uow) { this.uow = uow; }
+        public CreateCourseCommandHandler(IUnitOfWork uow, UserManager<Domain.Entities.User> userManager)
+        {
+            this.uow = uow;
+            this.userManager = userManager;
+        }
         public async Task<CourseInfo> Handle(CreateCourseCommand request, CancellationToken cancellationToken)
         {
 
@@ -31,6 +38,24 @@ namespace Application.Commands.Course
             };
 
             uow.CourseRepository.Add(course);
+
+            await uow.SaveChangesAsync(cancellationToken);
+
+            if((await userManager.GetRolesAsync(uow.UserRepository.GetById(request.CreatedByUserId))).Contains("Teacher"))
+            {
+                var courseEnrollment =
+                    new Domain.Entities.CourseEnrollment()
+                    {
+                        CourseId = course.Id,
+                        UserId = request.CreatedByUserId,
+                        EnrolledAt = DateTime.UtcNow,
+                        Status = Domain.Enums.EnrollmentStatus.Active,
+                        EnrollmentRole = Domain.Enums.EnrollmentRole.Teacher
+                    };
+
+                uow.CourseEnrollmentRepository.Add(courseEnrollment);
+            }
+
             await uow.SaveChangesAsync(cancellationToken);
 
             course = await uow.CourseRepository.Query().Include(c => c.CreatedByUser).FirstAsync(c => c.Id == course.Id);

@@ -16,23 +16,26 @@ namespace Application.Commands.User
 {
     public class RegisterCommandHandler : IRequestHandler<RegisterCommand, UserSessionInfo>
     {
-        
-              private readonly UserManager<Domain.Entities.User> userManager;
-              private readonly IConfiguration config;
-        
+
+        private readonly UserManager<Domain.Entities.User> userManager;
+        private readonly IConfiguration config;
+
 
         public RegisterCommandHandler(UserManager<Domain.Entities.User> userManager, IConfiguration configuration)
         {
             this.userManager = userManager;
             this.config = configuration;
-            
+
         }
 
         public async Task<UserSessionInfo> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             var existingUser = await userManager.FindByEmailAsync(request.Email);
-            if (existingUser != null)
+            if(existingUser != null)
                 throw new InvalidOperationException("A user with this email already exists.");
+
+            if(string.IsNullOrWhiteSpace(request.FullName))
+                throw new InvalidOperationException("Invalid name.");
 
             var user = new Domain.Entities.User
             {
@@ -43,17 +46,17 @@ namespace Application.Commands.User
             };
 
             var result = await userManager.CreateAsync(user, request.Password);
-            if (!result.Succeeded)
+            if(!result.Succeeded)
                 throw new InvalidOperationException(string.Join(", ", result.Errors.Select(e => e.Description)));
 
             await userManager.AddToRoleAsync(user, request.Role.ToString());
 
-            string token = await new JwtService(userManager,config).GenerateToken(user);
+            string token = await new JwtService(userManager, config).GenerateToken(user);
 
             return new UserSessionInfo(user, request.Role.ToString(), token);
         }
 
-      
-    
+
+
     }
 }

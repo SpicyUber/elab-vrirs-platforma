@@ -14,10 +14,10 @@ namespace Application.DTOs.User
         public string FullName { get; set; }
         public string Email { get; set; }
 
-        public string Role { get; set; }
+        public string Roles { get; set; }
         public string Token { get; set; }
 
-        public UserSessionInfo(Domain.Entities.User user, string role, string token)
+        public UserSessionInfo(Domain.Entities.User user, string roles, string token)
         {
             Id = user.Id;
 
@@ -25,7 +25,7 @@ namespace Application.DTOs.User
             Email = user.Email;
 
             Token = token;
-            Role = role;
+            Roles = roles;
         }
     }
 }

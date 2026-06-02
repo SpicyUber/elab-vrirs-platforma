@@ -14,9 +14,9 @@ namespace Application.DTOs.User
         public string? IndexNumber { get; set; }
         public string AvatarInBase64 { get; set; }
 
-        public string Role { get; set; }
+        public string Roles { get; set; }
 
-        public UserProfileInfo(Domain.Entities.User user, string avatarInBase64, string role) 
+        public UserProfileInfo(Domain.Entities.User user, string avatarInBase64, string roles) 
         {
             FullName = user.FullName;
             Email = user.Email;
@@ -24,7 +24,7 @@ namespace Application.DTOs.User
             IndexNumber = user.IndexNumber;
             AvatarInBase64 = avatarInBase64;
 
-            Role = role;
+            Roles = roles;
         }
     }
 }

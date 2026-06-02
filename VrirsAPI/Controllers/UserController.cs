@@ -2,6 +2,7 @@
 using Application.DTOs.CourseEnrollment;
 using Application.DTOs.User;
 using Application.Queries.CourseEnrollment;
+using Application.Queries.User;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Persistence.UnitOfWork.Interface;
@@ -19,7 +20,6 @@ namespace VrirsAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly IMediator mediator;
-        private readonly int avatarSizeLimitInBytes = 524288;
 
         public UserController(IMediator mediator)
         {
@@ -27,40 +27,94 @@ namespace VrirsAPI.Controllers
 
         }
 
-        [HttpGet("enrolled-in/{courseId}")]
-        public async Task<ActionResult<List<UserCourseEnrollmentInfo>>> GetEnrolledUsers(Guid courseId)
+        [HttpGet("{userId}")]
+        public async Task<ActionResult<UserProfileInfo>> Get(Guid userId)
         {
-            var request = new GetAllCourseEnrollmentsByCourseIdQuery() { CourseId = courseId };
+            var request = new GetUserByIdQuery() { Id = userId };
 
-            var response = await mediator.Send(request);
-            return Ok(response);
+            try
+            {
+                return Ok(await mediator.Send(request));
+            }
+            catch(Exception ex)
+            {
+                return NotFound();
+            }
+        }
+
+        [Authorize(Roles = "Admin,Teacher")]
+        [HttpGet("search")]
+        public async Task<ActionResult<UserSearchResultPage>> Get(UserSearchParams searchParams)
+        {
+            var request = new SearchUsersQuery() { SearchParams = searchParams };
+
+            try
+            {
+                return Ok(await mediator.Send(request));
+            }
+            catch(Exception)
+            {
+                return NotFound();
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{userId}")]
+        public async Task<ActionResult> Delete(Guid userId)
+        {
+            try
+            {
+                await mediator.Send(new DeleteStudentCommand() { StudentId = userId });
+                return Ok();
+            }
+            catch(Exception ex) { return BadRequest(ex.Message); }
         }
 
         [Authorize]
+        [Consumes("multipart/form-data")]
         [HttpPost("avatar-upload")]
-        public async Task<ActionResult<UserProfileInfo>> UploadAvatar(IFormFile avatar)
+        public async Task<ActionResult<string>> UploadAvatar(IFormFile avatar)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
             try
             {
-                ValidateAvatarUpload(avatar);
-
                 using Stream uploadStream = avatar.OpenReadStream();
 
-                UploadAvatarCommand request = new() { AvatarUploadStream = uploadStream, UserId = userId };
+                UploadAvatarCommand request = new()
+                {
+                    AvatarUploadStream = uploadStream,
+                    UserId = userId,
 
-                request.Name = Path.GetFileNameWithoutExtension(avatar.FileName);
-                request.Extension = Path.GetExtension(avatar.FileName);
+                    Name = Path.GetFileNameWithoutExtension(avatar.FileName),
+                    Extension = Path.GetExtension(avatar.FileName),
 
-                request.SizeInBytes = avatar.Length;
-                request.Mime = avatar.ContentType;
+                    SizeInBytes = avatar.Length,
+                    Mime = avatar.ContentType
+                };
 
                 var response = await mediator.Send(request);
-
                 return Ok(response);
             }
-            catch (InvalidOperationException e)
+            catch(InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [Authorize("Admin")]
+        [HttpPut]
+        public async Task<ActionResult<UserProfileInfo>> Edit(EditUserCommand request)
+        {
+            try
+            {
+                return Ok(await mediator.Send(request));
+            }
+            catch(InvalidOperationException e)
+            {
+                return NotFound();
+            }
+            catch(ValidationException e)
             {
                 return BadRequest(e.Message);
             }
@@ -74,7 +128,7 @@ namespace VrirsAPI.Controllers
                 var response = await mediator.Send(request);
                 return Ok(response);
             }
-            catch (InvalidOperationException e)
+            catch(InvalidOperationException e)
             {
                 return BadRequest(e.Message);
             }
@@ -88,20 +142,10 @@ namespace VrirsAPI.Controllers
                 var response = await mediator.Send(request);
                 return Ok(response);
             }
-            catch (UnauthorizedAccessException e)
+            catch(UnauthorizedAccessException e)
             {
                 return BadRequest(e.Message);
             }
-        }
-
-        private void ValidateAvatarUpload(IFormFile avatarUpload)
-        {
-            if (avatarUpload.ContentType != "image/jpeg" && avatarUpload.ContentType != "image/png")
-                throw new InvalidOperationException("Avatar must be in jpeg or png format.");
-            if (avatarUpload.Length > avatarSizeLimitInBytes)
-                throw new InvalidOperationException($"Avatar must be under {avatarSizeLimitInBytes / 1024} KB.");
-            if (avatarUpload.FileName.Length == 0)
-                throw new InvalidOperationException("File name cannot be empty.");
         }
     }
 }

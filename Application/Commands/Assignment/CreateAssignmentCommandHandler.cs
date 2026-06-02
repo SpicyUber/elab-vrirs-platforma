@@ -1,5 +1,6 @@
 ﻿using Application.Commands.Submission;
 using Application.DTOs.Assignment;
+using Domain.Enums;
 using Infrastructure.Persistence.UnitOfWork.Interface;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,14 @@ namespace Application.Commands.Assignment
 
         public async Task<AssignmentInfo> Handle(CreateAssignmentCommand request, CancellationToken cancellationToken)
         {
+            bool isTeacher = await uow.CourseEnrollmentRepository.Query()
+                                                                 .Where(ce => ce.UserId == request.CreatedByUserId
+                                                                 && ce.CourseId == request.CourseId
+                                                                 && ce.EnrollmentRole == EnrollmentRole.Teacher)
+                                                                 .AnyAsync(cancellationToken);
+
+            if(!isTeacher) throw new InvalidOperationException("Must be a teacher on this course!");
+
             var newAssignment = new Domain.Entities.Assignment()
             {
                 CourseId = request.CourseId,

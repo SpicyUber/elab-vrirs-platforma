@@ -27,7 +27,6 @@ namespace Application.Queries.Course
             .Include(c => c.Enrollments)
             .Select(c => new CourseInfo(c))
             .ToListAsync(cancellationToken);
-
         }
     }
 }

@@ -14,7 +14,7 @@ namespace VrirsAPI.Controllers
     [ApiController]
     public class AssignmentController : ControllerBase
     {
-        public readonly IMediator mediator;
+        private readonly IMediator mediator;
 
         public AssignmentController(IMediator mediator)
         {
@@ -22,8 +22,8 @@ namespace VrirsAPI.Controllers
         }
 
         [Authorize(Roles = "Teacher,Admin")]
-        [HttpPost("create")]
-        public async Task<ActionResult<Assignment>> Post([FromBody] Guid courseId)
+        [HttpPost("course/{courseId}")]
+        public async Task<ActionResult<Assignment>> Post(Guid courseId)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
@@ -36,8 +36,40 @@ namespace VrirsAPI.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Teacher")]
+        [HttpPut("course/{courseId}")]
+        public async Task<ActionResult<Assignment>> Edit([FromBody] EditAssignmentCommand request)
+        {
+            try
+            {
+                var result = await mediator.Send(request);
+                return Ok(result);
+            }
+            catch(InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("course/{courseId}/mine")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<ActionResult<List<AssignmentInfo>>> GetAllByUserId()
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            return Ok(
+                await mediator.Send
+                (
+                    new GetAllAssignmentsByUserIdQuery()
+                    {
+                        UserId = userId
+                    }
+                )
+            );
+        }
+
         [Authorize(Roles = "Teacher,Admin,Student")]
-        [HttpPost("course/{courseId}")]
+        [HttpGet("course/{courseId}")]
         public async Task<ActionResult<List<AssignmentInfo>>> GetAllByCourseId(Guid courseId)
         {
             return Ok(

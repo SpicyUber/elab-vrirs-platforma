@@ -1,10 +1,11 @@
 ﻿using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.Data;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Application.Services
 {
@@ -12,13 +13,22 @@ namespace Application.Services
     {
         private readonly UserManager<User> userManager;
         private readonly IConfiguration config;
-        public JwtService(UserManager<User> userManager, IConfiguration config) { this.userManager = userManager; this.config = config;  }
+        public JwtService(UserManager<User> userManager, IConfiguration config) { this.userManager = userManager; this.config = config; }
         public async Task<string> GenerateToken(User user)
         {
-            var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
-            new Claim(ClaimTypes.Email,user.Email), new Claim(ClaimTypes.Role, (await userManager.GetRolesAsync(user))[0])
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
+                new Claim(ClaimTypes.Email,user.Email),
 
             };
+
+            var roles = await userManager.GetRolesAsync(user);
+
+            foreach(var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetSection("JwtSettings")["SecretKey"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

@@ -11,7 +11,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -87,13 +89,36 @@ namespace VrirsAPI
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(setupAction: c =>
+            {
+                OpenApiSecurityScheme securityScheme = new()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter your JWT token."
+                };
+
+                c.AddSecurityDefinition("Auth", securityScheme);
+
+                c.AddSecurityRequirement(new()
+                {
+                    {
+                        new(){Reference = new OpenApiReference(){ Id = "Auth", Type = ReferenceType.SecurityScheme} },
+                        new List<string>()
+                    }
+                });
+            });
         }
 
-        private static void SetupAzureBlobStorage(WebApplicationBuilder builder)
+        private static void SetupFileStorage(WebApplicationBuilder builder)
         {
             var fileStorageSection = builder.Configuration.GetSection("FileStorage");
+            var uploadSection = builder.Configuration.GetSection("Upload");
             builder.Services.Configure<AzureBlobStorageOptions>(fileStorageSection);
+            builder.Services.Configure<UploadOptions>(uploadSection);
             builder.Services.AddSingleton<IFileService<Stream>, FileService>();
         }
 
@@ -106,7 +131,7 @@ namespace VrirsAPI
             builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             builder.Services.AddScoped<IMediator, Mediator>();
             builder.Services.AddScoped<JwtService>();
-            SetupAzureBlobStorage(builder);
+            SetupFileStorage(builder);
         }
     }
 

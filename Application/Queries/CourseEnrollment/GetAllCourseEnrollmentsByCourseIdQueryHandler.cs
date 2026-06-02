@@ -45,7 +45,7 @@ namespace Application.Queries.CourseEnrollment
             return courseEnrollmentsWithAvatars.ToList();
         }
 
-        private async Task<string> GetAvatarInBase64(User user, CancellationToken cancellationToken)
+        private async Task<string> GetAvatarInBase64(Domain.Entities.User user, CancellationToken cancellationToken)
         {
             if(user?.AvatarFile?.StoragePath == null) return null;
 

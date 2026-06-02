@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
+    <PackageReference Include="File.TypeChecker" Version="4.4.0" />
     <PackageReference Include="MediatR" Version="13.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.25" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.1" />
@@ -19,15 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\CourseEnrollment\" />
-    <Folder Include="Commands\SubmissionReview\" />
+    <Folder Include="Commands\FileMetadata\" />
     <Folder Include="Commands\ProjectExecution\" />
-    <Folder Include="Commands\ProjectAsset\" />
-    <Folder Include="Queries\CourseEnrollment\" />
-    <Folder Include="Queries\User\" />
-    <Folder Include="Queries\ProjectAsset\" />
     <Folder Include="Queries\ProjectExecution\" />
-    <Folder Include="Queries\SubmissionReview\" />
   </ItemGroup>
 
 </Project>

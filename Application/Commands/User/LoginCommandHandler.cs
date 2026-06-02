@@ -25,19 +25,25 @@ namespace Application.Commands.User
         public async Task<UserSessionInfo> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             var user = await userManager.FindByEmailAsync(request.Email);
-            if (user == null || !user.IsActive)
+
+            if(user == null || !user.IsActive)
                 throw new UnauthorizedAccessException("Invalid credentials.");
 
             var passwordValid = await userManager.CheckPasswordAsync(user, request.Password);
-            if (!passwordValid)
-                throw new UnauthorizedAccessException("Invalid credentials.");
 
-            var roles = await userManager.GetRolesAsync(user);
-            var role = roles.FirstOrDefault() ?? "Student";
+            if(!passwordValid)
+            {
+                await userManager.AccessFailedAsync(user);
+                throw new UnauthorizedAccessException("Invalid credentials.");
+            }
+
+            await userManager.ResetAccessFailedCountAsync(user);
+
+            var roles = string.Join(',', (await userManager.GetRolesAsync(user)));
 
             var token = await new JwtService(userManager, config).GenerateToken(user);
 
-            return new UserSessionInfo(user, role, token);
+            return new UserSessionInfo(user, roles, token);
         }
     }
 }

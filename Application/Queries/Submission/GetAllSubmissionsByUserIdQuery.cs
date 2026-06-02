@@ -11,11 +11,13 @@ namespace Application.Queries.Submission
 {
     public class GetAllSubmissionsByUserIdQuery : IRequest<List<SubmissionInfo>>
     {
-        public GetAllSubmissionsByUserIdQuery(Guid userId)
+        public GetAllSubmissionsByUserIdQuery(Guid userId, Guid assignmentId)
         {
-            this.UserId = userId;
+            UserId = userId;
+            AssignmentId = assignmentId;
         }
 
         public Guid UserId { get; set; }
+        public Guid AssignmentId { get; set; }
     }
 }

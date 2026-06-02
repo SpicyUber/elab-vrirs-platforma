@@ -21,7 +21,7 @@ namespace Application.Queries.Submission
             return await uow.SubmissionRepository.Query()
                 .Include(s => s.Student)
                 .Include(s => s.Assignment)
-                .Where(s => s.StudentUserId.Equals(request.UserId))
+                .Where(s => s.StudentUserId.Equals(request.UserId) && s.AssignmentId.Equals(request.AssignmentId))
                 .Select(s => new SubmissionInfo(s))
                 .ToListAsync(cancellationToken);
         }

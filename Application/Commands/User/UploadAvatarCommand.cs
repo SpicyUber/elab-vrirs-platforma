@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Commands.User
 {
-    public class UploadAvatarCommand : IRequest<UserProfileInfo>
+    public class UploadAvatarCommand : IRequest<string>
     {
         public Stream AvatarUploadStream { get; set; }
         public string Mime {  get; set; }

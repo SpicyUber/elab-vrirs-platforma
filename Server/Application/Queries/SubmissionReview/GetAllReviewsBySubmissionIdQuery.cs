@@ -10,6 +10,6 @@ namespace Application.Queries.SubmissionReview
 {
     public class GetAllReviewsBySubmissionIdQuery : IRequest<List<SubmissionReviewInfo>>
     {
-        public Guid Id { get; set; }
+        public Guid SubmissionId { get; set; }
     }
 }

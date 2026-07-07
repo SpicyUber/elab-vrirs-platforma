@@ -17,13 +17,17 @@ namespace Application.Queries.SubmissionReview
         public async Task<List<SubmissionReviewInfo>> Handle(GetAllReviewsBySubmissionIdQuery request, CancellationToken cancellationToken)
         {
             var result =
-                await uow.SubmissionReviewRepository
+                (await uow.SubmissionRepository
                 .Query()
-                .Include(sr => sr.ReviewedByUser)
-                .Where(sr => sr.SubmissionId == request.Id)
-                .Select(sr => new SubmissionReviewInfo(sr))
-                .ToListAsync(cancellationToken);
-
+                .Where(s => s.Id == request.SubmissionId)
+                .Include(s => s.Reviews)
+                .ThenInclude(r => r.ReviewedByUser)
+                .FirstAsync(cancellationToken))
+                .Reviews
+                .Select(r => new SubmissionReviewInfo(r))
+                .OrderBy(r => r.ReviewedAt)
+                .ToList();
+                
             return result;
         }
     }

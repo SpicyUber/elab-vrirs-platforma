@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Course;
+using Domain.Enums;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,6 @@ namespace Application.Queries.Course
     public class GetAllCoursesByUserIdQuery : IRequest<List<CourseInfo>>
     {
         public Guid UserId { get; set; }
+        public EnrollmentRole? Role { get; set; }
     }
 }

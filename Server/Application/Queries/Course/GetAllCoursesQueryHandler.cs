@@ -25,6 +25,7 @@ namespace Application.Queries.Course
             return await uow.CourseRepository.Query()
             .Include(c => c.CreatedByUser)
             .Include(c => c.Enrollments)
+            .Where(c => c.IsActive)
             .Select(c => new CourseInfo(c))
             .ToListAsync(cancellationToken);
         }

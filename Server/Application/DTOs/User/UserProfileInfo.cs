@@ -8,6 +8,7 @@ namespace Application.DTOs.User
 {
     public class UserProfileInfo
     {
+        public Guid Id { get; set; }
         public string FullName { get; set; }
         public string Email { get; set; }
 
@@ -18,6 +19,8 @@ namespace Application.DTOs.User
 
         public UserProfileInfo(Domain.Entities.User user, string avatarInBase64, string roles) 
         {
+            Id = user.Id;
+
             FullName = user.FullName;
             Email = user.Email;
 

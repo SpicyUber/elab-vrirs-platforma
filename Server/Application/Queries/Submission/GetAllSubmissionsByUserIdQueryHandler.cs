@@ -14,16 +14,16 @@ namespace Application.Queries.Submission
     {
         private readonly IUnitOfWork uow;
 
-        public GetAllSubmissionsByUserIdQueryHandler(IUnitOfWork uow) { this.uow = uow; }
+        public GetAllSubmissionsByUserIdQueryHandler(IUnitOfWork uow) => this.uow = uow;
 
         public async Task<List<SubmissionInfo>> Handle(GetAllSubmissionsByUserIdQuery request, CancellationToken cancellationToken)
-        {
-            return await uow.SubmissionRepository.Query()
-                .Include(s => s.Student)
-                .Include(s => s.Assignment)
-                .Where(s => s.StudentUserId.Equals(request.UserId) && s.AssignmentId.Equals(request.AssignmentId))
-                .Select(s => new SubmissionInfo(s))
-                .ToListAsync(cancellationToken);
-        }
+
+        => await uow.SubmissionRepository.Query()
+                                    .Where(s => s.StudentUserId == request.UserId)
+                                    .Include(s=>s.Student)
+                                    .OrderByDescending(s => s.CreatedAt)
+                                    .Select(s => new SubmissionInfo(s))
+                                    .ToListAsync(cancellationToken);
+
     }
 }

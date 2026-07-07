@@ -24,6 +24,7 @@ namespace Application.Queries.ProjectAsset
             return await uow.ProjectAssetRepository
                 .Query()
                 .Where(a => a.SubmissionId == request.Id)
+                .Include(a => a.FileMetadata)
                 .Select(a => new ProjectAssetInfo(a))
                 .ToListAsync(cancellationToken);
         }

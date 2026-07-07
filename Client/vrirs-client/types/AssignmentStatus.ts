@@ -1,0 +1,1 @@
+export type AssignmentStatus = "Draft" | "Published" | "Archived";

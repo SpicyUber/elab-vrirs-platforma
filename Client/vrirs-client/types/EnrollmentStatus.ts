@@ -1,0 +1,1 @@
+export type EnrollmentStatus = "Active" | "Removed" | "Invited"

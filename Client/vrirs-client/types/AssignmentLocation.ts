@@ -1,0 +1,1 @@
+export type AssignmentLocation = "Class" | "Homework";

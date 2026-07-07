@@ -13,6 +13,6 @@ namespace Application.DTOs.User
         public string? Email { get; set; }
 
         public int PageNumber {  get; set; }
-        public int EntiresPerPage { get; set; }
+        public int EntriesPerPage { get; set; }
     }
 }

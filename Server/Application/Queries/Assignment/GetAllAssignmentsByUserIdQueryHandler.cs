@@ -22,7 +22,7 @@ namespace Application.Queries.Assignment
         public async Task<List<AssignmentInfo>> Handle(GetAllAssignmentsByUserIdQuery request, CancellationToken cancellationToken)
         {
             return await uow.AssignmentRepository.Query()
-                .Where(a => a.CreatedByUserId == request.UserId)
+                .Where(a => a.CreatedByUserId == request.UserId && a.CourseId == request.CourseId && a.Status != Domain.Enums.AssignmentStatus.Archived)
                 .Include(a => a.Course)
                 .Include(a => a.CreatedByUser)
                 .Select(a => new AssignmentInfo(a))

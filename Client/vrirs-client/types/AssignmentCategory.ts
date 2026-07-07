@@ -1,0 +1,1 @@
+export type AssignmentCategory = "Csmp" | "Gpss" | "Other";

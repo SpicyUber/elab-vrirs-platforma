@@ -42,17 +42,17 @@ namespace Application.Queries.User
 
             int userCount = await userQuery.CountAsync(cancellationToken);
 
-            request.SearchParams.EntiresPerPage = Math.Clamp(request.SearchParams.EntiresPerPage, 1, 20);
+            request.SearchParams.EntriesPerPage = Math.Clamp(request.SearchParams.EntriesPerPage, 1, 20);
 
             int totalPages = Math.Max(
                 1,
-                (userCount + request.SearchParams.EntiresPerPage - 1)
-                / request.SearchParams.EntiresPerPage);
+                (userCount + request.SearchParams.EntriesPerPage - 1)
+                / request.SearchParams.EntriesPerPage);
 
             request.SearchParams.PageNumber = Math.Clamp(request.SearchParams.PageNumber, 1, totalPages);
 
-            var users = await userQuery.Skip((request.SearchParams.PageNumber - 1) * request.SearchParams.EntiresPerPage)
-                                       .Take(request.SearchParams.EntiresPerPage)
+            var users = await userQuery.Skip((request.SearchParams.PageNumber - 1) * request.SearchParams.EntriesPerPage)
+                                       .Take(request.SearchParams.EntriesPerPage)
                                        .ToListAsync(cancellationToken);
 
             List<UserProfileInfo> results = new();
@@ -65,7 +65,7 @@ namespace Application.Queries.User
             return new()
             {
                 UserProfiles = results,
-                EntiresPerPage = request.SearchParams.EntiresPerPage,
+                EntiresPerPage = request.SearchParams.EntriesPerPage,
                 MaxPages = totalPages,
                 PageNumer = request.SearchParams.PageNumber
             };

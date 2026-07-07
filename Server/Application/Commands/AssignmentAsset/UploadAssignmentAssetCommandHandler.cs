@@ -92,6 +92,7 @@ namespace Application.Commands.AssignmentAsset
                 FileMetadata = fileMetadata,
 
                 AssignmentId = request.AssignmentId,
+                UploadStatus = UploadStatus.Validated,
 
                 AssetType = await GetAssetType(request, cancellationToken)
             };

@@ -19,8 +19,9 @@ namespace Application.Queries.SubmissionReview
             return await uow.SubmissionReviewRepository
                             .Query()
                             .Include(sr => sr.Submission)
+                            .Include(sr => sr.ReviewedByUser)
                             .Where(sr => sr.Submission.StudentUserId == request.UserId)
-                            .OrderBy(sr => sr.ReviewedAt)
+                            .OrderByDescending(sr => sr.ReviewedAt)
                             .Select(sr => new SubmissionReviewInfo(sr))
                             .ToListAsync(cancellationToken);
         }

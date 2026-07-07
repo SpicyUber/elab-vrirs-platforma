@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Submission;
+using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Persistence.UnitOfWork.Interface;
 using MediatR;
@@ -30,11 +31,22 @@ namespace Application.Commands.Submission
             if(submission.Status != SubmissionStatus.Draft)
                 throw new InvalidOperationException("Cannot edit a submitted submission!");
 
+            bool openNow = (submission.Assignment.OpensAt == null || submission.Assignment.OpensAt <= DateTime.UtcNow) && (submission.Assignment.DueAt == null || submission.Assignment.DueAt >= DateTime.UtcNow);
+
+            if(!openNow) throw new InvalidOperationException("Assignment closed!");
+
+            bool didMakeSubmission = submission.StudentUserId == request.UserId;
+
+            if(!didMakeSubmission) throw new InvalidOperationException("Cannot edit other user's submissions!");
+
             submission.Title = request.Title;
             submission.Description = request.Description;
 
-            if(request.Publish)
+            if(request.Publish) 
+            { 
                 submission.Status = SubmissionStatus.Submitted;
+                submission.SubmittedAt = DateTime.UtcNow;
+            }
 
             await uow.SaveChangesAsync(cancellationToken);
 

@@ -39,7 +39,7 @@ namespace Application.Queries.User
 
             var avatarInBase64 = await GetAvatarInBase64(user, cancellationToken);
 
-            return new UserProfileInfo(user, roles, avatarInBase64);
+            return new UserProfileInfo(user, avatarInBase64, roles);
         }
 
         private async Task<string> GetAvatarInBase64(Domain.Entities.User user, CancellationToken cancellationToken)

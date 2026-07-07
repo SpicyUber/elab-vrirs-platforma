@@ -26,7 +26,9 @@ namespace Application.Queries.Course
                 .Include(c => c.CreatedByUser)
                 .Include(c => c.Enrollments)
                 .Where(c => 
-                    c.Enrollments.Any(e => e.UserId == request.UserId && e.Status == EnrollmentStatus.Active)
+                    c.Enrollments.Any(e => e.UserId == request.UserId 
+                    && e.Status == EnrollmentStatus.Active 
+                    && (request.Role == null || request.Role.Equals(e.EnrollmentRole)))
                     && c.IsActive)
                 .Select(c => new CourseInfo(c))
                 .ToListAsync(cancellationToken);

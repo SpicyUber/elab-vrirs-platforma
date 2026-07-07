@@ -36,7 +36,7 @@ namespace Application.Commands.ProjectAsset
 
             if(submission == null) throw new InvalidOperationException("Submission not found!");
 
-            if(submission.Assignment.AllowProjectUpload) throw new InvalidOperationException("Cannot upload project!");
+            if(!submission.Assignment.AllowProjectUpload) throw new InvalidOperationException("Cannot upload project, uploads are disabled on this assignment!");
 
             if(submission.Status != SubmissionStatus.Draft) throw new InvalidOperationException("Cannot attach assets to published submission!");
 
@@ -80,7 +80,7 @@ namespace Application.Commands.ProjectAsset
             {
                 FileMetadataId = fileMetadata.Id,
                 FileMetadata = fileMetadata,
-
+                UploadStatus = UploadStatus.Validated,
                 SubmissionId = request.SubmissionId,
 
                 AssetType = await GetAssetType(request, cancellationToken)

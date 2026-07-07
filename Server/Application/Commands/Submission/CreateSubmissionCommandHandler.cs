@@ -37,7 +37,7 @@ namespace Application.Commands.Submission
                                                                 && s.StudentUserId == request.StudentUserId)
                                                                 .AnyAsync(cancellationToken);
 
-            if(isResubmission && assignment.AllowMultipleAttempts) throw new InvalidOperationException("Resubmission not allowed!");
+            if(isResubmission && !assignment.AllowMultipleAttempts) throw new InvalidOperationException("Resubmission not allowed!");
 
             var newSubmission = new Domain.Entities.Submission()
             {

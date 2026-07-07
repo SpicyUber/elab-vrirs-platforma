@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
@@ -39,6 +40,8 @@ namespace VrirsAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors("allow-all");
 
             app.UseHttpsRedirection();
 
@@ -110,6 +113,17 @@ namespace VrirsAPI
                         new(){Reference = new OpenApiReference(){ Id = "Auth", Type = ReferenceType.SecurityScheme} },
                         new List<string>()
                     }
+                });
+            });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("allow-all", policy =>
+                {
+                    policy
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowAnyOrigin();
                 });
             });
         }

@@ -1,14 +1,8 @@
 ﻿using Application.Commands.User;
-using Application.DTOs.CourseEnrollment;
 using Application.DTOs.User;
-using Application.Queries.CourseEnrollment;
 using Application.Queries.User;
-using Domain.Entities;
-using Domain.Enums;
-using Infrastructure.Persistence.UnitOfWork.Interface;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -44,7 +38,7 @@ namespace VrirsAPI.Controllers
 
         [Authorize(Roles = "Admin,Teacher")]
         [HttpGet("search")]
-        public async Task<ActionResult<UserSearchResultPage>> Get(UserSearchParams searchParams)
+        public async Task<ActionResult<UserSearchResultPage>> Get([FromQuery]UserSearchParams searchParams)
         {
             var request = new SearchUsersQuery() { SearchParams = searchParams };
 
@@ -102,7 +96,7 @@ namespace VrirsAPI.Controllers
             }
         }
 
-        [Authorize("Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<ActionResult<UserProfileInfo>> Edit(EditUserCommand request)
         {

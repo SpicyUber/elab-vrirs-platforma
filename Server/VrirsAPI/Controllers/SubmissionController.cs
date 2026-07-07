@@ -1,15 +1,8 @@
-﻿using Application.Commands.ProjectAsset;
-using Application.Commands.Submission;
-using Application.Commands.SubmissionReview;
-using Application.Commands.User;
-using Application.DTOs.ProjectAsset;
+﻿using Application.Commands.Submission;
 using Application.DTOs.Submission;
-using Application.DTOs.SubmissionReview;
 using Application.Queries.Submission;
-using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -28,12 +21,36 @@ namespace VrirsAPI.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpGet("from-assignment/{assignmentId}/mine")]
+        public async Task<ActionResult<List<SubmissionInfo>>> GetAllFromAssignmentByUserId(Guid assignmentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if(userId == null) return Forbid();
+
+            return Ok(await mediator.Send(new GetAllSubmissionsInAssignmentByUserIdQuery(Guid.Parse(userId), assignmentId)));
+        }
+
+        [Authorize(Roles = "Student")]
+        [HttpGet("mine")]
         public async Task<ActionResult<List<SubmissionInfo>>> GetAllByUserId(Guid assignmentId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if(userId == null) return Forbid();
 
-            return Ok(await mediator.Send(new GetAllSubmissionsByUserIdQuery(Guid.Parse(userId), assignmentId)));
+            return Ok(await mediator.Send(new GetAllSubmissionsByUserIdQuery() { UserId = Guid.Parse(userId) }));
+        }
+
+        [Authorize]
+        [HttpGet("{submissionId}")]
+        public async Task<ActionResult<SubmissionInfo>> GetFromAssignmentById(Guid submissionId)
+        {
+            try
+            {
+                return Ok(await mediator.Send(new GetSubmissionByIdQuery() {SubmissionId = submissionId}));
+            }
+            catch(Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -71,6 +88,11 @@ namespace VrirsAPI.Controllers
         [HttpPut]
         public async Task<ActionResult<SubmissionInfo>> Put([FromBody] EditSubmissionCommand request)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if(userId == null) return Forbid();
+
+            request.UserId = Guid.Parse(userId);
+
             try
             {
                 return Ok(await mediator.Send(request));

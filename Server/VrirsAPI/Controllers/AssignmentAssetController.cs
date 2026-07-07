@@ -39,6 +39,21 @@ namespace VrirsAPI.Controllers
             }
         }
 
+        [Authorize]
+        [HttpDelete("{assignmentId}/assets/{fileMetadataId}")]
+        public async Task<ActionResult<List<AssignmentAssetInfo>>> DeleteAsset(Guid assignmentId, Guid fileMetadataId)
+        {
+            try
+            {
+                await mediator.Send(new DeleteAssignmentAssetByIdCommand() { AssignmentId = assignmentId, FileMetadataId = fileMetadataId });
+                return NoContent();
+            }
+            catch(Exception)
+            {
+                return NotFound();
+            }
+        }
+
         [Authorize(Roles = "Teacher")]
         [Consumes("multipart/form-data")]
         [RequestSizeLimit(100_000_000)]

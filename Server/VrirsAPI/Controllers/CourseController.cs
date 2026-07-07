@@ -5,13 +5,10 @@ using Application.DTOs.CourseEnrollment;
 using Application.DTOs.User;
 using Application.Queries.Course;
 using Application.Queries.CourseEnrollment;
-using Application.Queries.Submission;
-using Domain.Entities;
+using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
 using System.Security.Claims;
 
 namespace VrirsAPI.Controllers
@@ -57,14 +54,20 @@ namespace VrirsAPI.Controllers
             return Ok(await mediator.Send(new GetAllCoursesQuery()));
         }
 
+        [HttpGet("{courseId}")]
+        public async Task<ActionResult<List<CourseInfo>>> Get(Guid courseId)
+        {
+            return Ok(await mediator.Send(new GetCourseQuery(courseId)));
+        }
+
         [Authorize(Roles = "Teacher,Student,Admin")]
         [HttpGet("mine")]
-        public async Task<ActionResult<List<CourseInfo>>> GetAllByUserId()
+        public async Task<ActionResult<List<CourseInfo>>> GetAllByUserId([FromQuery] EnrollmentRole? role)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if(userId == null) return Forbid();
 
-            return Ok(await mediator.Send(new GetAllCoursesByUserIdQuery() { UserId = Guid.Parse(userId) }));
+            return Ok(await mediator.Send(new GetAllCoursesByUserIdQuery() { UserId = Guid.Parse(userId), Role = role }));
         }
 
         [HttpGet("{courseId}/enrolled-users")]
@@ -74,6 +77,25 @@ namespace VrirsAPI.Controllers
 
             var response = await mediator.Send(request);
             return Ok(response);
+        }
+
+        [HttpGet("{courseId}/my-enrollment-role")]
+        public async Task<ActionResult<EnrollmentRole>> GetMyEnrollmentRole(Guid courseId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if(userId == null) return Forbid();
+
+            var request = new GetCourseEnrollmentRoleByCourseAndUserIdQuery() { CourseId = courseId, UserId = Guid.Parse(userId) };
+
+            try
+            {
+                var response = await mediator.Send(request);
+                return Ok(response);
+            }
+            catch(Exception)
+            {
+                return NotFound();
+            }
         }
 
         [Authorize(Roles = "Teacher,Admin")]
@@ -103,7 +125,7 @@ namespace VrirsAPI.Controllers
             {
                 var command = new EnrollUsingUserIdCommand() { CourseId = courseId, UserId = request.UserId, IsTeacher = request.IsTeacher };
 
-                var response = await mediator.Send(request);
+                var response = await mediator.Send(command);
                 return Ok(response);
             }
             catch(Exception ex)
@@ -142,6 +164,21 @@ namespace VrirsAPI.Controllers
             catch(Exception)
             {
                 return NotFound();
+            }
+        }
+
+        [Authorize(Roles = "Teacher,Admin")]
+        [HttpPut("{courseId}")]
+        public async Task<ActionResult<CourseInfo>> Update([FromBody] UpdateCourseCommand request)
+        {
+            try
+            {
+                var response = await mediator.Send(request);
+                return Ok(response);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

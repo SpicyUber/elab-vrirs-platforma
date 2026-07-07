@@ -22,7 +22,7 @@ namespace VrirsAPI.Controllers
         }
 
         [Authorize(Roles = "Teacher,Admin")]
-        [HttpPost("course/{courseId}")]
+        [HttpPost("from-course/{courseId}")]
         public async Task<ActionResult<AssignmentInfo>> Post(Guid courseId)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -37,7 +37,7 @@ namespace VrirsAPI.Controllers
         }
 
         [Authorize(Roles = "Teacher")]
-        [HttpPut("course/{courseId}")]
+        [HttpPut("from-course/{courseId}")]
         public async Task<ActionResult<AssignmentInfo>> Edit([FromBody] EditAssignmentCommand request)
         {
             try
@@ -51,9 +51,9 @@ namespace VrirsAPI.Controllers
             }
         }
 
-        [HttpGet("course/{courseId}/mine")]
+        [HttpGet("from-course/{courseId}/mine")]
         [Authorize(Roles = "Teacher")]
-        public async Task<ActionResult<List<AssignmentInfo>>> GetAllByUserId()
+        public async Task<ActionResult<List<AssignmentInfo>>> GetAllByUserId(Guid courseId)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
@@ -62,14 +62,26 @@ namespace VrirsAPI.Controllers
                 (
                     new GetAllAssignmentsByUserIdQuery()
                     {
-                        UserId = userId
+                        UserId = userId,
+                        CourseId = courseId
                     }
                 )
             );
         }
 
         [Authorize(Roles = "Teacher,Admin,Student")]
-        [HttpGet("course/{courseId}")]
+        [HttpGet("{assignmentId}")]
+        public async Task<ActionResult<AssignmentInfo>> GetById(Guid assignmentId)
+        {
+            return Ok(await mediator.Send(
+                new GetAssignmentByIdQuery()
+                {
+                    AssignmentId = assignmentId
+                }));
+        }
+
+        [Authorize(Roles = "Teacher,Admin,Student")]
+        [HttpGet("from-course/{courseId}")]
         public async Task<ActionResult<List<AssignmentInfo>>> GetAllByCourseId(Guid courseId)
         {
             return Ok(
@@ -81,6 +93,27 @@ namespace VrirsAPI.Controllers
                     }
                 )
             );
+        }
+
+        [Authorize(Roles = "Teacher,Admin")]
+        [HttpDelete("{assignmentId}")]
+        public async Task<ActionResult<List<AssignmentInfo>>> ArchiveById(Guid assignmentId)
+        {
+            try
+            {
+                await mediator.Send
+                    (
+                        new ArchiveAssignmentCommand()
+                        {
+                            AssignmentId = assignmentId
+                        }
+                    );
+                return NoContent();
+            }
+            catch(Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Application.Commands.ProjectAsset;
 using Application.DTOs.ProjectAsset;
+using Application.Queries.ProjectAsset;
 using Application.Queries.SubmissionReview;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -63,7 +64,7 @@ namespace VrirsAPI.Controllers
         {
             try
             {
-                var result = await mediator.Send(new GetAllReviewsBySubmissionIdQuery() { Id = submissionId });
+                var result = await mediator.Send(new GetAllProjectAssetsBySubmissionIdQuery { Id = submissionId });
                 return Ok(result);
             }
             catch(Exception)

@@ -1,10 +1,12 @@
 ﻿using Application.Queries.FileMetadata;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace VrirsAPI.Controllers
 {
+    [Authorize]
     [Route("api/downloads")]
     [ApiController]
     public class FileMetadataController : ControllerBase

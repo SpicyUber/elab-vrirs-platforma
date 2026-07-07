@@ -238,14 +238,14 @@ const archiveCourse = async () => {
   >
     Add Assignment
   </Button></>}
- <Button
+ {!user?.roles.toLowerCase().includes("student") && <Button
     variant="contained"
     color="primary"
     onClick={()=>navigate(`/courses/${courseId}/members`)}
     sx={{ margin: 2 }}
   >
     Members
-  </Button>
+  </Button>}
 
     </Box>
     
